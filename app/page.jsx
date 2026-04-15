@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { prisma } from "@/src/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function RootPage() {
     const products = await prisma.product.findMany({
         where: { stock: { gt: 0 } },

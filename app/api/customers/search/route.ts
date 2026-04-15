@@ -2,6 +2,10 @@ import { z } from "zod";
 import { prisma } from "@/src/lib/prisma";
 import { requireAdminToken } from "@/src/lib/require-admin-token";
 import type { CustomerSearchResponse } from "@/src/types/customer";
+type SalesMetrics = {
+  totalSpend: number;
+  purchaseFrequency: number;
+};
 
 const searchQuerySchema = z.object({
   q: z.string().trim().min(1).max(100),
@@ -42,6 +46,7 @@ export async function GET(request: Request) {
       createdAt: true,
     },
   });
+  type CustomerSearchRow = (typeof customers)[number];
 
   if (customers.length === 0) {
     const empty: CustomerSearchResponse = {
@@ -51,7 +56,7 @@ export async function GET(request: Request) {
     return Response.json(empty);
   }
 
-  const customerIds = customers.map((customer) => customer.id);
+  const customerIds = customers.map((customer: CustomerSearchRow) => customer.id);
 
   const salesByCustomer = await prisma.sale.groupBy({
     by: ["customerId"],
@@ -59,9 +64,10 @@ export async function GET(request: Request) {
     _sum: { totalPrice: true },
     _count: { _all: true },
   });
+  type SalesByCustomerRow = (typeof salesByCustomer)[number];
 
-  const salesMap = new Map(
-    salesByCustomer.map((row) => [
+  const salesMap = new Map<number, SalesMetrics>(
+    salesByCustomer.map((row: SalesByCustomerRow) => [
       row.customerId,
       {
         totalSpend: row._sum.totalPrice ?? 0,
@@ -72,7 +78,7 @@ export async function GET(request: Request) {
 
   const payload: CustomerSearchResponse = {
     query,
-    results: customers.map((customer) => {
+    results: customers.map((customer: CustomerSearchRow) => {
       const metrics = salesMap.get(customer.id);
       return {
         id: customer.id,

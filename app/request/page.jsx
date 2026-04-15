@@ -1,6 +1,8 @@
 import { CustomerRequestForm } from "@/app/components/CustomerRequestForm";
 import { prisma } from "@/src/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function RequestPage() {
   const products = await prisma.product.findMany({
     where: { stock: { gt: 0 } },

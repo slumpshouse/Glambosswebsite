@@ -94,8 +94,9 @@ async function fetchRecentSales(): Promise<RecentSale[]> {
       customer: { select: { name: true } },
     },
   });
+  type RecentSaleRow = (typeof sales)[number];
 
-  return sales.map((sale) => ({
+  return sales.map((sale: RecentSaleRow) => ({
     id: sale.id,
     productName: sale.product.name,
     customerName: sale.customer.name || null,
@@ -117,8 +118,9 @@ async function fetchPendingRequests(): Promise<PendingRequest[]> {
       product: { select: { name: true } },
     },
   });
+  type PendingRequestRow = (typeof requests)[number];
 
-  return requests.map((req) => ({
+  return requests.map((req: PendingRequestRow) => ({
     id: req.id,
     productName: req.product.name,
     quantity: req.quantity,
@@ -135,8 +137,9 @@ async function fetchLowStockItems(): Promise<LowStockItem[]> {
     where: { stock: { lte: 5 } },
     orderBy: { stock: "asc" },
   });
+  type LowStockProductRow = (typeof products)[number];
 
-  return products.map((product) => ({
+  return products.map((product: LowStockProductRow) => ({
     id: product.id,
     name: product.name,
     stock: product.stock,
@@ -181,16 +184,20 @@ async function fetchWeeklySalesOverview(): Promise<WeeklySalesOverview> {
     orderBy: { _sum: { quantity: "desc" } },
     take: 3,
   });
+  type TopProductGroupRow = (typeof topProducts)[number];
 
   // Fetch product details for top products
   const topProductDetails = await prisma.product.findMany({
     where: {
-      id: { in: topProducts.map((p) => p.productId) },
+      id: { in: topProducts.map((p: TopProductGroupRow) => p.productId) },
     },
   });
+  type TopProductDetailRow = (typeof topProductDetails)[number];
 
-  const topProductsWithDetails = topProducts.map((tp) => {
-    const product = topProductDetails.find((p) => p.id === tp.productId);
+  const topProductsWithDetails = topProducts.map((tp: TopProductGroupRow) => {
+    const product = topProductDetails.find(
+      (p: TopProductDetailRow) => p.id === tp.productId
+    );
     return {
       id: tp.productId,
       name: product?.name || "Unknown",
