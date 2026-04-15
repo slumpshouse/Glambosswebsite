@@ -86,6 +86,7 @@ export async function GET(
 
   const hasMore = sales.length > limit;
   const slicedSales = hasMore ? sales.slice(0, limit) : sales;
+  type CustomerSaleRow = (typeof slicedSales)[number];
 
   const payload: CustomerDetailResponse = {
     customer: {
@@ -99,7 +100,7 @@ export async function GET(
       totalLifetimeSpend: summary._sum.totalPrice ?? 0,
       purchaseFrequency: summary._count._all,
     },
-    purchaseHistory: slicedSales.map((sale) => ({
+    purchaseHistory: slicedSales.map((sale: CustomerSaleRow) => ({
       saleId: sale.id,
       productName: sale.product.name,
       quantity: sale.quantity,

@@ -14,7 +14,7 @@ export type ConfirmPendingRequestResult = {
   };
   sale: {
     id: number;
-    requestId: number;
+    requestId: number | null;
     productId: number;
     customerId: number;
     quantity: number;

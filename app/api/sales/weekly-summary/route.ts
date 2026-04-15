@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { z } from "zod";
 import { getToken } from "next-auth/jwt";
 import { prisma } from "@/src/lib/prisma";
 import { aggregateWeeklySales } from "@/src/lib/weekly-sales-aggregation";
@@ -14,6 +15,14 @@ type SaveWeeklySummaryPayload = {
   structured: AiWeeklySummaryStructured;
   aggregate: WeeklySalesAggregate;
 };
+
+const aiStructuredSummarySchema = z.object({
+  headline: z.string().trim().min(1, "headline is required"),
+  summary: z.string().trim().min(1, "summary is required"),
+  keyInsights: z.array(z.string().trim().min(1)).min(1),
+  risks: z.array(z.string().trim().min(1)).min(1),
+  recommendedActions: z.array(z.string().trim().min(1)).min(1),
+});
 
 const globalRateLimitState = globalThis as unknown as {
   weeklySummaryRateLimit?: Map<string, number>;
@@ -86,7 +95,11 @@ async function generateStructuredSummary(
   "risks": string[],
   "recommendedActions": string[]
 }
-Use the weekly aggregate below:\n${JSON.stringify(aggregate)}`;
+Use the weekly aggregate below:\n${JSON.stringify(aggregate)}
+Rules:
+- Use only data from the provided aggregate.
+- Do not invent values, counts, or products not present in the aggregate.
+- Each array must contain at least one concise bullet.`;
 
   const completion = await client.chat.completions.create({
     model: "gpt-4o-mini",
@@ -103,15 +116,14 @@ Use the weekly aggregate below:\n${JSON.stringify(aggregate)}`;
     throw new Error("OpenAI returned an empty response");
   }
 
-  const parsed = JSON.parse(content) as Partial<AiWeeklySummaryStructured>;
+  const raw = JSON.parse(content) as unknown;
+  const parsed = aiStructuredSummarySchema.safeParse(raw);
 
-  return {
-    headline: parsed.headline ?? "Weekly Sales Summary",
-    summary: parsed.summary ?? "No summary was generated.",
-    keyInsights: parsed.keyInsights ?? [],
-    risks: parsed.risks ?? [],
-    recommendedActions: parsed.recommendedActions ?? [],
-  };
+  if (!parsed.success) {
+    throw new Error("AI summary response did not match required schema");
+  }
+
+  return parsed.data as AiWeeklySummaryStructured;
 }
 
 export async function GET(request: Request) {
