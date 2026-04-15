@@ -1,5 +1,6 @@
 import { prisma } from "@/src/lib/prisma";
 import { createProductSchema } from "@/src/lib/product-validation";
+import { requireAdminToken } from "@/src/lib/require-admin-token";
 
 export async function GET() {
   try {
@@ -14,6 +15,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const token = await requireAdminToken(request);
+  if (!token) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const parsed = createProductSchema.safeParse(body);

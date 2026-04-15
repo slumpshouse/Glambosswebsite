@@ -19,7 +19,7 @@ export default function DashboardPage() {
     // Verify admin authentication
     useEffect(() => {
         if (status === "unauthenticated") {
-            router.push("/admin/login");
+        router.push("/login");
         }
     }, [status, router]);
     // Fetch dashboard data
@@ -192,10 +192,10 @@ export default function DashboardPage() {
         <section className="bg-white rounded-lg shadow border border-gray-200 p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <QuickActionButton href="/admin/products" label="Add Product" emoji="➕"/>
-            <QuickActionButton href="/admin/product-requests" label="View Requests" emoji="📋"/>
+            <QuickActionButton href="/products" label="Add Product" emoji="➕"/>
+            <QuickActionButton href="/requests" label="View Requests" emoji="📋"/>
             <QuickActionButton href="/admin/sales/manual" label="Log Manual Sale" emoji="💳"/>
-            <QuickActionButton href="/admin/sales" label="View Sales" emoji="📊"/>
+            <QuickActionButton href="/sales" label="View Sales" emoji="📊"/>
             <QuickActionButton href="/admin/ai-summary" label="AI Summary" emoji="🤖"/>
           </div>
         </section>

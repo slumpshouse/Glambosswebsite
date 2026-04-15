@@ -1,4 +1,5 @@
 import type { NextAuthOptions } from "next-auth";
+import { getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
 import { prisma } from "./prisma";
@@ -53,8 +54,8 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
 
   pages: {
-    signIn: "/admin/login",
-    error: "/admin/login",
+    signIn: "/login",
+    error: "/login",
   },
 
   callbacks: {
@@ -77,3 +78,12 @@ export const authOptions: NextAuthOptions = {
     },
   },
 };
+
+export async function getSession() {
+  return getServerSession(authOptions);
+}
+
+export async function isAuthenticated() {
+  const session = await getSession();
+  return Boolean(session?.user && session.user.role === "admin");
+}

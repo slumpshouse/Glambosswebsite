@@ -1,5 +1,6 @@
 import { prisma } from "@/src/lib/prisma";
 import { updateProductSchema } from "@/src/lib/product-validation";
+import { requireAdminToken } from "@/src/lib/require-admin-token";
 
 type ProductRouteContext = {
   params: Promise<{ id: string }>;
@@ -28,6 +29,11 @@ export async function GET(_request: Request, context: ProductRouteContext) {
 }
 
 export async function PUT(request: Request, context: ProductRouteContext) {
+  const token = await requireAdminToken(request);
+  if (!token) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await context.params;
   const parsedId = parseId(id);
 
@@ -63,6 +69,11 @@ export async function PUT(request: Request, context: ProductRouteContext) {
 }
 
 export async function DELETE(_request: Request, context: ProductRouteContext) {
+  const token = await requireAdminToken(_request);
+  if (!token) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id } = await context.params;
   const parsedId = parseId(id);
 

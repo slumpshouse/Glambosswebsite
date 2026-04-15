@@ -1,24 +1,30 @@
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
-/**
- * Middleware that protects all app pages.
- *
- * Allowed without a session:
- *   - /admin/login          (the sign-in page itself)
- *   - /api/auth/*           (NextAuth internal endpoints)
- *
- * Every other page path requires a valid JWT whose `role` is "admin";
- * otherwise the request is redirected to /admin/login.
- */
+const protectedPrefixes = [
+  "/dashboard",
+  "/products",
+  "/requests",
+  "/customers",
+  "/sales",
+  "/admin",
+];
+
+function isProtectedPath(pathname: string): boolean {
+  return protectedPrefixes.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+}
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Let NextAuth's own API routes and the login page through unconditionally.
-  if (
-    pathname.startsWith("/api/auth") ||
-    pathname === "/admin/login"
-  ) {
+  // Let public and auth endpoints through.
+  if (pathname.startsWith("/api/auth") || pathname === "/login" || pathname === "/admin/login") {
+    return NextResponse.next();
+  }
+
+  if (!isProtectedPath(pathname)) {
     return NextResponse.next();
   }
 
@@ -28,7 +34,7 @@ export async function middleware(req: NextRequest) {
   });
 
   if (!token || token.role !== "admin") {
-    const loginUrl = new URL("/admin/login", req.url);
+    const loginUrl = new URL("/login", req.url);
     // Preserve the intended destination so we can redirect back after login.
     loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
@@ -38,6 +44,12 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // Run on all pages, excluding Next internals, static assets, and API routes.
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/dashboard/:path*",
+    "/products/:path*",
+    "/requests/:path*",
+    "/customers/:path*",
+    "/sales/:path*",
+    "/admin/:path*",
+  ],
 };

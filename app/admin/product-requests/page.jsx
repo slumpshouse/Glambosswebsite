@@ -79,12 +79,13 @@ export default function ProductRequestsPage() {
     async function handleConfirm(requestId) {
         var _a, _b;
         setError(null);
-        const customerPhone = window.prompt("Customer phone (required):");
+      const request = pendingRequests.find((entry) => entry.id === requestId);
+      const customerPhone = window.prompt("Customer phone (required):", (request === null || request === void 0 ? void 0 : request.customer.phone) || "");
         if (!customerPhone || !customerPhone.trim()) {
             setError("Customer phone is required to confirm the request.");
             return;
         }
-        const customerName = (_a = window.prompt("Customer name (optional):")) === null || _a === void 0 ? void 0 : _a.trim();
+      const customerName = (_a = window.prompt("Customer name (optional):", (request === null || request === void 0 ? void 0 : request.customer.name) || "")) === null || _a === void 0 ? void 0 : _a.trim();
         setConfirmingRequestId(requestId);
         const response = await fetch(`/api/product-requests/${requestId}/confirm`, {
             method: "PATCH",
@@ -135,7 +136,8 @@ export default function ProductRequestsPage() {
                 <th className="border p-2 text-left">Product</th>
                 <th className="border p-2 text-left">Quantity</th>
                 <th className="border p-2 text-left">Status</th>
-                <th className="border p-2 text-left">Customer ID</th>
+                <th className="border p-2 text-left">Customer</th>
+                <th className="border p-2 text-left">Notes</th>
                 <th className="border p-2 text-left">Action</th>
               </tr>
             </thead>
@@ -147,7 +149,13 @@ export default function ProductRequestsPage() {
                   <td className="border p-2">{request.product.name}</td>
                   <td className="border p-2">{request.quantity}</td>
                   <td className="border p-2">{request.status}</td>
-                  <td className="border p-2">{(_a = request.customerId) !== null && _a !== void 0 ? _a : "-"}</td>
+                  <td className="border p-2">
+                    {request.customer ? (<div>
+                        <p className="font-medium text-gray-900">{(_a = request.customer.name) !== null && _a !== void 0 ? _a : "Unknown"}</p>
+                        <p className="text-sm text-gray-600">{request.customer.phone}</p>
+                      </div>) : ("-")}
+                  </td>
+                  <td className="border p-2 text-sm text-gray-600">{request.notes || "-"}</td>
                   <td className="border p-2">
                     <button type="button" onClick={() => void handleConfirm(request.id)} disabled={confirmingRequestId === request.id} className="rounded bg-green-600 hover:bg-green-700 active:bg-green-800 px-3 py-1 text-sm text-white font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
                       {confirmingRequestId === request.id ? "Confirming..." : "Confirm"}
@@ -156,7 +164,7 @@ export default function ProductRequestsPage() {
                 </tr>);
             })}
               {pendingRequests.length === 0 && (<tr>
-                  <td className="border p-2 text-center" colSpan={6}>
+                  <td className="border p-2 text-center" colSpan={7}>
                     No pending requests.
                   </td>
                 </tr>)}

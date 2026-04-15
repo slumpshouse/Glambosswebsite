@@ -44,7 +44,20 @@ async function checkMiddleware(
   pathname: string,
   tokenPayload: Record<string, unknown> | null
 ): Promise<MiddlewareVerdict> {
-  if (pathname.startsWith("/api/auth") || pathname === "/admin/login") {
+  const protectedPrefixes = [
+    "/dashboard",
+    "/products",
+    "/requests",
+    "/customers",
+    "/sales",
+    "/admin",
+  ];
+
+  const protectedPath = protectedPrefixes.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+
+  if (pathname.startsWith("/api/auth") || pathname === "/login" || pathname === "/admin/login" || !protectedPath) {
     return "allow";
   }
 
@@ -163,16 +176,18 @@ describe("B. Session Management", () => {
 
 describe("C. Access Control", () => {
   it("redirects protected admin routes without token", async () => {
-    expect(await checkMiddleware("/admin/products", null)).toBe("redirect");
-    expect(await checkMiddleware("/admin/product-requests", null)).toBe("redirect");
+    expect(await checkMiddleware("/products", null)).toBe("redirect");
+    expect(await checkMiddleware("/requests", null)).toBe("redirect");
+    expect(await checkMiddleware("/sales", null)).toBe("redirect");
+    expect(await checkMiddleware("/customers", null)).toBe("redirect");
   });
 
   it("allows protected admin routes with admin token", async () => {
-    expect(await checkMiddleware("/admin/products", { role: "admin" })).toBe("allow");
+    expect(await checkMiddleware("/products", { role: "admin" })).toBe("allow");
   });
 
-  it("always allows /admin/login and /api/auth/*", async () => {
-    expect(await checkMiddleware("/admin/login", null)).toBe("allow");
+  it("always allows /login and /api/auth/*", async () => {
+    expect(await checkMiddleware("/login", null)).toBe("allow");
     expect(await checkMiddleware("/api/auth/session", null)).toBe("allow");
   });
 });

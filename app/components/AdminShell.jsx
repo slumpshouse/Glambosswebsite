@@ -1,15 +1,32 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
 const navItems = [
-    { href: "/dashboard", label: "Dashboard" },
+  { href: "/dashboard", label: "Dashboard" },
   { href: "/customers", label: "Customers" },
-    { href: "/admin/products", label: "Products" },
-    { href: "/admin/product-requests", label: "Requests" },
-    { href: "/admin/sales", label: "Sales" },
-    { href: "/admin/sales/manual", label: "Manual Sale" },
-    { href: "/admin/ai-summary", label: "AI Summary" },
+  { href: "/products", label: "Products" },
+  { href: "/requests", label: "Requests" },
+  { href: "/sales", label: "Sales" },
+  { href: "/admin/sales/manual", label: "Manual Sale" },
+  { href: "/admin/ai-summary", label: "AI Summary" },
 ];
+
+const adminPrefixes = [
+  "/dashboard",
+  "/products",
+  "/requests",
+  "/customers",
+  "/sales",
+  "/admin",
+];
+
+function isAdminPath(pathname) {
+  return adminPrefixes.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+}
+
 function isActivePath(pathname, href) {
     if (href === "/dashboard") {
         return pathname === "/dashboard";
@@ -18,9 +35,11 @@ function isActivePath(pathname, href) {
 }
 export function AdminShell({ children }) {
     const pathname = usePathname();
-    if (pathname === "/admin/login") {
+
+  if (!isAdminPath(pathname) || pathname === "/login" || pathname === "/admin/login") {
         return <>{children}</>;
     }
+
     return (<div className="min-h-screen bg-gray-50 lg:grid lg:grid-cols-[240px_1fr]">
       <aside className="border-r border-gray-200 bg-white p-4 lg:p-6">
         <div className="mb-6">

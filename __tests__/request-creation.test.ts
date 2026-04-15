@@ -1,10 +1,19 @@
 import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 
-const { mockFindMany, mockFindUnique, mockCreate, mockProductUpdate } = vi.hoisted(() => ({
+const {
+  mockFindMany,
+  mockFindUnique,
+  mockCreate,
+  mockProductUpdate,
+  mockCustomerUpsert,
+  mockRequireAdminToken,
+} = vi.hoisted(() => ({
   mockFindMany: vi.fn(),
   mockFindUnique: vi.fn(),
   mockCreate: vi.fn(),
   mockProductUpdate: vi.fn(),
+  mockCustomerUpsert: vi.fn(),
+  mockRequireAdminToken: vi.fn(),
 }));
 
 vi.mock("@/src/lib/prisma", () => ({
@@ -17,7 +26,14 @@ vi.mock("@/src/lib/prisma", () => ({
       findUnique: mockFindUnique,
       update: mockProductUpdate,
     },
+    customer: {
+      upsert: mockCustomerUpsert,
+    },
   },
+}));
+
+vi.mock("@/src/lib/require-admin-token", () => ({
+  requireAdminToken: mockRequireAdminToken,
 }));
 
 import { GET, POST } from "../app/api/product-requests/route";
@@ -25,6 +41,7 @@ import { GET, POST } from "../app/api/product-requests/route";
 describe("Request Creation Tests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (mockRequireAdminToken as Mock).mockResolvedValue({ role: "admin" });
   });
 
   describe("Valid request creation", () => {
@@ -241,7 +258,11 @@ describe("Request Creation Tests", () => {
 
       (mockFindMany as Mock).mockResolvedValue(pendingRows);
 
-      const response = await GET();
+      const request = new Request("http://localhost/api/product-requests", {
+        method: "GET",
+      });
+
+      const response = await GET(request);
       const body = await response.json();
 
       expect(response.status).toBe(200);
