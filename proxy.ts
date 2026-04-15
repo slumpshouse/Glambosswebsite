@@ -16,11 +16,15 @@ function isProtectedPath(pathname: string): boolean {
   );
 }
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Let public and auth endpoints through.
-  if (pathname.startsWith("/api/auth") || pathname === "/login" || pathname === "/admin/login") {
+  if (
+    pathname.startsWith("/api/auth") ||
+    pathname === "/login" ||
+    pathname === "/admin/login"
+  ) {
     return NextResponse.next();
   }
 
