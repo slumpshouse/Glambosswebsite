@@ -2,6 +2,8 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { prisma } from "@/src/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function MyRequestsPage() {
   const cookieStore = await cookies();
   const customerPhone = cookieStore.get("customer_phone")?.value;

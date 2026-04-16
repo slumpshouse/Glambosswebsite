@@ -7,7 +7,7 @@
     "postinstall": "prisma generate",
     "prebuild": "prisma generate",
     "typecheck": "tsc --noEmit --pretty false",
-    "build": "npm run typecheck && next build",
+    "build": "npm run typecheck && next build --debug",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
