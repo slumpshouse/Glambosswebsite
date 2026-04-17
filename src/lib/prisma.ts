@@ -19,9 +19,32 @@ const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClientInstance;
 };
 
+function createUnavailablePrismaClient(reason: string): PrismaClientInstance {
+  const throwingHandler: ProxyHandler<(...args: unknown[]) => never> = {
+    get() {
+      return new Proxy(
+        () => {
+          throw new Error(reason);
+        },
+        throwingHandler
+      );
+    },
+    apply() {
+      throw new Error(reason);
+    },
+  };
+
+  return new Proxy(
+    () => {
+      throw new Error(reason);
+    },
+    throwingHandler
+  ) as unknown as PrismaClientInstance;
+}
+
 function createPrismaClient(): PrismaClientInstance {
   if (!PrismaClient) {
-    throw new Error(
+    return createUnavailablePrismaClient(
       "PrismaClient is unavailable. Ensure `prisma generate` runs before the build and runtime start."
     );
   }
@@ -29,15 +52,24 @@ function createPrismaClient(): PrismaClientInstance {
   const connectionString = process.env.DATABASE_URL;
 
   if (!connectionString) {
-    throw new Error("DATABASE_URL is not set.");
+    return createUnavailablePrismaClient(
+      "DATABASE_URL is not set. Configure it in Vercel Environment Variables."
+    );
   }
 
-  const adapter = new PrismaPg(new Pool({ connectionString }));
+  try {
+    const adapter = new PrismaPg(new Pool({ connectionString }));
 
-  return new PrismaClient({
-    adapter,
-    log: ["warn", "error"],
-  });
+    return new PrismaClient({
+      adapter,
+      log: ["warn", "error"],
+    });
+  } catch (error) {
+    console.error("[prisma] Failed to initialize client", error);
+    return createUnavailablePrismaClient(
+      "Failed to initialize Prisma client. Check database credentials and Prisma setup."
+    );
+  }
 }
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();

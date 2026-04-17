@@ -4,10 +4,18 @@ import { prisma } from "@/src/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function RootPage() {
-    const products = await prisma.product.findMany({
-        where: { stock: { gt: 0 } },
-        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-    });
+    let products = [];
+    let loadError = null;
+
+    try {
+        products = await prisma.product.findMany({
+            where: { stock: { gt: 0 } },
+            orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        });
+    } catch (error) {
+        console.error("[RootPage] Failed to load products", error);
+        loadError = "Products are temporarily unavailable. Please try again shortly.";
+    }
 
     return (
         <main className="mx-auto flex w-full max-w-7xl flex-col gap-10 p-6">
@@ -67,6 +75,12 @@ export default async function RootPage() {
                         Open request-only page
                     </Link>
                 </div>
+
+                {loadError && (
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                        {loadError}
+                    </div>
+                )}
 
                 {products.length === 0 ? (
                     <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center text-sm text-gray-600">

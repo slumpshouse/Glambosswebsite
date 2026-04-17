@@ -25,25 +25,33 @@ export default async function MyRequestsPage() {
     );
   }
 
-  const requests = await prisma.request.findMany({
-    where: {
-      customer: {
-        phone: customerPhone,
-      },
-    },
-    include: {
-      product: {
-        select: {
-          id: true,
-          name: true,
-          category: true,
-          imageUrl: true,
-          cost: true,
+  let requests = [];
+  let loadError = null;
+
+  try {
+    requests = await prisma.request.findMany({
+      where: {
+        customer: {
+          phone: customerPhone,
         },
       },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            category: true,
+            imageUrl: true,
+            cost: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch (error) {
+    console.error("[MyRequestsPage] Failed to load requests", error);
+    loadError = "We could not load your requests right now. Please refresh and try again.";
+  }
 
   return (
     <main className="mx-auto w-full max-w-5xl p-6">
@@ -59,6 +67,12 @@ export default async function MyRequestsPage() {
           New Request
         </Link>
       </div>
+
+      {loadError && (
+        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+          {loadError}
+        </div>
+      )}
 
       {requests.length === 0 ? (
         <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center text-gray-600">
