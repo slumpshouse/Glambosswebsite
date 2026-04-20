@@ -28,6 +28,15 @@ export default async function MyRequestsPage() {
   let requests = [];
   let loadError = null;
 
+  function safeNumber(value, fallback = 0) {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value;
+    }
+
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+
   try {
     requests = await prisma.request.findMany({
       where: {
@@ -80,7 +89,14 @@ export default async function MyRequestsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {requests.map((request) => (
+          {requests.map((request) => {
+            const product = request?.product;
+            const productName = product?.name ?? "Unavailable product";
+            const productCategory = product?.category ?? "Unknown";
+            const productImage = product?.imageUrl || "https://via.placeholder.com/160?text=No+Image";
+            const unitCost = safeNumber(product?.cost, 0);
+
+            return (
             <article
               key={request.id}
               className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-5"
@@ -88,17 +104,17 @@ export default async function MyRequestsPage() {
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex gap-4">
                   <img
-                    src={request.product.imageUrl}
-                    alt={request.product.name}
+                    src={productImage}
+                    alt={productName}
                     className="h-16 w-16 rounded-xl object-cover"
                   />
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                      {request.product.category}
+                      {productCategory}
                     </p>
-                    <h2 className="text-lg font-semibold text-gray-900">{request.product.name}</h2>
+                    <h2 className="text-lg font-semibold text-gray-900">{productName}</h2>
                     <p className="text-sm text-gray-600">
-                      {request.quantity} x ${request.product.cost.toFixed(2)}
+                      {request.quantity} x ${unitCost.toFixed(2)}
                     </p>
                   </div>
                 </div>
@@ -132,7 +148,8 @@ export default async function MyRequestsPage() {
                 </div>
               )}
             </article>
-          ))}
+            );
+          })}
         </div>
       )}
     </main>

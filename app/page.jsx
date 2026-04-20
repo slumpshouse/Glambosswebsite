@@ -7,6 +7,15 @@ export default async function RootPage() {
     let products = [];
     let loadError = null;
 
+    function safeNumber(value, fallback = 0) {
+        if (typeof value === "number" && Number.isFinite(value)) {
+            return value;
+        }
+
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : fallback;
+    }
+
     try {
         products = await prisma.product.findMany({
             where: { stock: { gt: 0 } },
@@ -88,15 +97,23 @@ export default async function RootPage() {
                     </div>
                 ) : (
                     <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                        {products.map((product) => (
+                        {products.map((product) => {
+                            const productName = product?.name ?? "Unnamed product";
+                            const productCategory = product?.category ?? "Uncategorized";
+                            const productDescription = product?.description ?? "No description available.";
+                            const productImage = product?.imageUrl || "https://via.placeholder.com/640x480?text=No+Image";
+                            const productCost = safeNumber(product?.cost, 0);
+                            const productStock = safeNumber(product?.stock, 0);
+
+                            return (
                             <article
                                 key={product.id}
                                 className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
                             >
                                 <div className="aspect-[4/3] bg-gray-100">
                                     <img
-                                        src={product.imageUrl}
-                                        alt={product.name}
+                                        src={productImage}
+                                        alt={productName}
                                         className="h-full w-full object-cover"
                                     />
                                 </div>
@@ -104,22 +121,22 @@ export default async function RootPage() {
                                     <div className="flex items-start justify-between gap-3">
                                         <div>
                                             <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                                                {product.category}
+                                                {productCategory}
                                             </p>
                                             <h3 className="mt-1 text-lg font-semibold text-gray-900">
-                                                {product.name}
+                                                {productName}
                                             </h3>
                                         </div>
                                         <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                                            {product.stock} in stock
+                                            {productStock} in stock
                                         </span>
                                     </div>
 
-                                    <p className="text-sm leading-6 text-gray-600">{product.description}</p>
+                                    <p className="text-sm leading-6 text-gray-600">{productDescription}</p>
 
                                     <div className="flex items-center justify-between">
                                         <p className="text-lg font-bold text-gray-900">
-                                            ${product.cost.toFixed(2)}
+                                            ${productCost.toFixed(2)}
                                         </p>
                                         <Link
                                             href={`/request?product=${product.id}`}
@@ -130,7 +147,8 @@ export default async function RootPage() {
                                     </div>
                                 </div>
                             </article>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </section>
