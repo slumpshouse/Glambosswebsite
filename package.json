@@ -6,8 +6,7 @@
     "dev": "next dev",
     "postinstall": "prisma generate",
     "prebuild": "prisma generate",
-    "typecheck": "tsc --noEmit --pretty false",
-    "build": "prisma generate && npm run typecheck && next build --debug",
+    "build": "prisma generate && next build --debug",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest",
@@ -15,12 +14,11 @@
     "setup:hooks": "git config core.hooksPath .githooks"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.7.0",
-    "@types/pg": "^8.20.0",
     "bcrypt": "^6.0.0",
     "next": "16.2.2",
     "next-auth": "^4.24.13",
@@ -34,15 +32,9 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@testing-library/react": "^16.3.2",
-    "@types/bcrypt": "^6.0.0",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.2",
     "tailwindcss": "^4",
-    "tsx": "^4.21.0",
-    "typescript": "^5",
     "vitest": "^4.1.3"
   }
 }
