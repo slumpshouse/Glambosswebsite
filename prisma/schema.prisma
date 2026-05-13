@@ -59,11 +59,22 @@ model Sale {
   quantity   Int
   unitPrice  Float
   totalPrice Float
+  paymentStatus String @default("pending")
+  stripePaymentIntentId String? @unique
+  currency String @default("usd")
+  paidAt DateTime?
   createdAt  DateTime @default(now())
 
   request  Request? @relation(fields: [requestId], references: [id], onDelete: SetNull)
   product  Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
   customer Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+}
+
+model PaymentWebhookEvent {
+  id        Int      @id @default(autoincrement())
+  eventId   String   @unique
+  eventType String
+  receivedAt DateTime @default(now())
 }
 
 model AuditLog {

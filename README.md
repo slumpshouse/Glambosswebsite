@@ -8,6 +8,7 @@ The proposed solution is a business management web application that gives my aun
 - Admin authentication and protected routes.
 - Product and stock management.
 - Customer request creation and confirmation workflow.
+- Customer payment flow for confirmed sales.
 - Sales recording, including manual sales entry.
 - Dashboard metrics and weekly sales summaries.
 - Audit logs for important admin actions.
@@ -28,13 +29,14 @@ The proposed solution is a business management web application that gives my aun
 - The app depends on PostgreSQL for core data operations.
 - Prisma client generation is required before build and runtime.
 - Admin access must follow role-based authorization rules.
-- Online payments are out of scope for this version (no payments).
+- Online payments use Stripe for customer checkout after request confirmation.
 - Real-time chat and advanced analytics are not included yet.
 
 ## Core features
 - Secure admin login with role-based route protection.
 - Product catalog and stock management for daily operations.
 - Customer request workflow from creation to confirmation.
+- Stripe-based payment checkout for confirmed requests.
 - Manual sales entry with transaction-safe validation.
 - Customer lookup and request/sales history view.
 - Dashboard metrics and weekly sales summary generation.
@@ -53,6 +55,9 @@ npm install
 DATABASE_URL=your_postgres_connection_string
 NEXTAUTH_SECRET=your_random_secret
 NEXTAUTH_URL=http://localhost:3000
+STRIPE_SECRET_KEY=your_stripe_secret_key
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 ```
 
 3. Generate Prisma client:
@@ -74,3 +79,9 @@ npm run dev
 ```
 
 6. Open the app at `http://localhost:3000`.
+
+## Payments
+- Customers submit requests first, then complete payment after the request is confirmed.
+- Create a Stripe webhook in your Stripe dashboard pointing to `/api/payments/webhook`.
+- Store the Stripe keys in `.env` before running the app.
+- Payment status is visible in the customer request history and admin sales tables.

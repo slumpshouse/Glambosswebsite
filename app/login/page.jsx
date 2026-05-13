@@ -44,16 +44,16 @@ function LoginPageContent() {
   }
 
   return (
-    <main className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-sm rounded-xl border bg-white p-8 shadow-md">
+    <main className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-rose-50 px-4">
+      <div className="w-full max-w-sm rounded-2xl border-2 border-pink-200 bg-white p-8 shadow-xl">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Admin Login</h1>
-          <p className="mt-1 text-sm text-gray-500">Glam Goddess Shop Dashboard</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">Admin Login</h1>
+          <p className="mt-1 text-sm text-purple-600">✨ Glam Goddess Shop Dashboard</p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <label htmlFor="email" className="text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="text-sm font-semibold text-purple-700">
               Email
             </label>
             <input
@@ -66,7 +66,7 @@ function LoginPageContent() {
                   email: e.target.value,
                 }))
               }
-              className="rounded border border-gray-300 p-2 text-sm focus:border-black focus:outline-none"
+              className="rounded-lg border-2 border-pink-200 bg-pink-50 p-2.5 text-sm text-purple-900 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300"
               placeholder="admin@example.com"
               required
               autoComplete="email"
@@ -75,7 +75,7 @@ function LoginPageContent() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="password" className="text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="text-sm font-semibold text-purple-700">
               Password
             </label>
             <input
@@ -88,7 +88,7 @@ function LoginPageContent() {
                   password: e.target.value,
                 }))
               }
-              className="rounded border border-gray-300 p-2 text-sm focus:border-black focus:outline-none"
+              className="rounded-lg border-2 border-pink-200 bg-pink-50 p-2.5 text-sm text-purple-900 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300"
               placeholder="********"
               required
               autoComplete="current-password"
@@ -96,7 +96,7 @@ function LoginPageContent() {
           </div>
 
           {error && (
-            <p role="alert" className="rounded bg-red-50 p-2 text-sm text-red-600">
+            <p role="alert" className="rounded-lg bg-red-50 p-2.5 text-sm text-red-600 font-medium border-l-4 border-red-400">
               {error}
             </p>
           )}
@@ -104,15 +104,15 @@ function LoginPageContent() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-1 w-full rounded bg-black px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-900 active:bg-gray-950 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-2 w-full rounded-lg bg-gradient-to-r from-pink-500 to-purple-500 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:from-pink-600 hover:to-purple-600 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 shadow-md hover:shadow-lg"
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
-        <div className="mt-5 text-center text-sm text-gray-600">
-          <Link href="/" className="font-medium text-black hover:underline">
-             Customer Site
+        <div className="mt-5 text-center text-sm text-purple-700">
+          <Link href="/" className="font-semibold text-pink-600 hover:text-purple-600 transition-colors">
+            ← Back to Customer Site
           </Link>
         </div>
       </div>

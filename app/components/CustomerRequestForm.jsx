@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
@@ -16,11 +17,20 @@ function isValidProductId(value, availableProducts) {
   return availableProducts.some((product) => String(product.id) === value);
 }
 
+function getSafeRequestedQuantity(value, fallback = 1) {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    return fallback;
+  }
+  return parsed;
+}
+
 export function CustomerRequestForm({
   initialProducts = [],
   showBackLink = false,
   backHref = "/",
 }) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const inStockInitialProducts = (initialProducts ?? []).filter(
     (product) => product.stock > 0
@@ -37,12 +47,18 @@ export function CustomerRequestForm({
     inStockInitialProducts.length > 0 || initialProducts.length > 0
   );
   const requestedProductId = searchParams.get("product") ?? "";
+  const requestedQuantity = getSafeRequestedQuantity(searchParams.get("quantity"), 1);
 
   useEffect(() => {
     if (products.length > 0) {
       const preferredProductId = isValidProductId(requestedProductId, products)
         ? requestedProductId
         : String(products[0].id);
+      const preferredProduct =
+        products.find((product) => String(product.id) === preferredProductId) ?? null;
+      const preferredQuantity = preferredProduct
+        ? String(Math.min(preferredProduct.stock, requestedQuantity))
+        : "1";
 
       setForm((prev) => ({
         ...prev,
@@ -50,6 +66,7 @@ export function CustomerRequestForm({
           prev.productId && isValidProductId(prev.productId, products)
             ? prev.productId
             : preferredProductId,
+        quantity: prev.productId ? prev.quantity : preferredQuantity,
       }));
       setLoadingProducts(false);
       return;
@@ -89,7 +106,7 @@ export function CustomerRequestForm({
     }
 
     void loadProducts();
-  }, [didLoadProducts, initialProducts.length, products, requestedProductId]);
+  }, [didLoadProducts, initialProducts.length, products, requestedProductId, requestedQuantity]);
 
   const selectedProduct = useMemo(
     () => products.find((product) => String(product.id) === form.productId) ?? null,
@@ -122,6 +139,29 @@ export function CustomerRequestForm({
       quantity: String(normalizedQuantity),
     }));
   }
+
+  function selectProductByIndex(nextIndex) {
+    if (products.length === 0) {
+      return;
+    }
+
+    const safeIndex = (nextIndex + products.length) % products.length;
+    const nextProduct = products[safeIndex];
+
+    setForm((prev) => ({
+      ...prev,
+      productId: String(nextProduct.id),
+      quantity: "1",
+    }));
+  }
+
+  const selectedProductIndex = useMemo(() => {
+    if (!selectedProduct) {
+      return -1;
+    }
+
+    return products.findIndex((product) => product.id === selectedProduct.id);
+  }, [products, selectedProduct]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -183,6 +223,12 @@ export function CustomerRequestForm({
         quantity: "1",
         notes: "",
       }));
+
+      // Redirect to payment page
+      if (body.saleId) {
+        router.push(`/payments/${body.saleId}`);
+        return;
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to submit request");
     } finally {
@@ -191,12 +237,12 @@ export function CustomerRequestForm({
   }
 
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7">
+    <section className="rounded-2xl border-2 border-pink-200 bg-gradient-to-br from-white to-pink-50 p-6 shadow-lg sm:p-8">
       {showBackLink && (
         <div className="mb-5">
           <Link
             href={backHref}
-            className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-black"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-pink-600 hover:text-purple-600 transition-colors"
           >
             <span aria-hidden="true">&larr;</span>
             Back to products
@@ -205,13 +251,13 @@ export function CustomerRequestForm({
       )}
 
       {selectedProduct && (
-        <div className="mb-6 flex items-center gap-4 rounded-2xl bg-indigo-50 p-4 text-indigo-900">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 text-white">
-            <span className="text-xl">•</span>
+        <div className="mb-6 flex items-center gap-4 rounded-2xl bg-gradient-to-r from-pink-100 to-purple-100 p-5 text-purple-900 border-2 border-pink-200">
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-purple-500 text-white font-bold text-xl">
+            ✨
           </div>
           <div>
-            <p className="text-xl font-semibold leading-tight">{selectedProduct.name}</p>
-            <p className="text-sm font-semibold text-indigo-700">
+            <p className="text-xl font-semibold leading-tight text-purple-900">{selectedProduct.name}</p>
+            <p className="text-sm font-semibold text-pink-600">
               ${selectedProduct.cost.toFixed(2)} per unit
             </p>
           </div>
@@ -219,27 +265,37 @@ export function CustomerRequestForm({
       )}
 
       <div className="mb-6">
-        <h2 className="text-3xl font-semibold tracking-tight text-gray-900">
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
           Submit a product request
         </h2>
-        <p className="mt-2 max-w-xl text-sm leading-6 text-gray-600">
-          We'll confirm your request and reach out to arrange payment and pickup. Your order is not placed until we confirm it.
+        <p className="mt-2 max-w-xl text-sm leading-6 text-purple-800">
+          We&apos;ll confirm your request and reach out to arrange payment and pickup. Your order is not placed until we confirm it.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-5 grid gap-4">
-        {products.length > 1 && (
-          <div className="grid gap-2">
-            <label htmlFor="product" className="text-sm font-medium text-gray-700">
-              Product
-            </label>
+      <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
+        <div className="grid gap-2">
+          <label htmlFor="product" className="text-sm font-semibold text-purple-700">
+            Product
+          </label>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => selectProductByIndex(selectedProductIndex - 1)}
+              className="rounded-lg border-2 border-pink-300 bg-white px-3 py-2 text-sm font-semibold text-pink-600 hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={loadingProducts || products.length <= 1 || selectedProductIndex < 0}
+              aria-label="Previous product"
+            >
+              Prev
+            </button>
+
             <select
               id="product"
               value={form.productId}
               onChange={(event) =>
-                setForm((prev) => ({ ...prev, productId: event.target.value }))
+                setForm((prev) => ({ ...prev, productId: event.target.value, quantity: "1" }))
               }
-              className="rounded-xl border border-gray-300 px-4 py-3 text-sm focus:border-black focus:outline-none"
+              className="flex-1 rounded-lg border-2 border-pink-200 bg-pink-50 px-4 py-3 text-sm text-purple-900 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300"
               disabled={loadingProducts || products.length === 0}
               required
             >
@@ -249,11 +305,26 @@ export function CustomerRequestForm({
                 </option>
               ))}
             </select>
+
+            <button
+              type="button"
+              onClick={() => selectProductByIndex(selectedProductIndex + 1)}
+              className="rounded-lg border-2 border-pink-300 bg-white px-3 py-2 text-sm font-semibold text-pink-600 hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={loadingProducts || products.length <= 1 || selectedProductIndex < 0}
+              aria-label="Next product"
+            >
+              Next
+            </button>
           </div>
-        )}
+          {products.length > 1 && selectedProductIndex >= 0 && (
+            <p className="text-xs text-purple-600">
+              Viewing product {selectedProductIndex + 1} of {products.length}
+            </p>
+          )}
+        </div>
 
         <div className="grid gap-2">
-          <label htmlFor="customerName" className="text-sm font-medium text-gray-700">
+          <label htmlFor="customerName" className="text-sm font-semibold text-purple-700">
             Your name
           </label>
           <input
@@ -263,14 +334,14 @@ export function CustomerRequestForm({
             onChange={(event) =>
               setForm((prev) => ({ ...prev, customerName: event.target.value }))
             }
-            className="rounded-xl border border-gray-300 px-4 py-3 text-sm focus:border-black focus:outline-none"
+            className="rounded-lg border-2 border-pink-200 bg-pink-50 px-4 py-3 text-sm text-purple-900 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300"
             placeholder="Full name"
             required
           />
         </div>
 
         <div className="grid gap-2">
-          <label htmlFor="customerPhone" className="text-sm font-medium text-gray-700">
+          <label htmlFor="customerPhone" className="text-sm font-semibold text-purple-700">
             Phone number
           </label>
           <input
@@ -280,44 +351,44 @@ export function CustomerRequestForm({
             onChange={(event) =>
               setForm((prev) => ({ ...prev, customerPhone: event.target.value }))
             }
-            className="rounded-xl border border-gray-300 px-4 py-3 text-sm focus:border-black focus:outline-none"
+            className="rounded-lg border-2 border-pink-200 bg-pink-50 px-4 py-3 text-sm text-purple-900 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300"
             placeholder="267-xxx-xxxx"
             required
           />
         </div>
 
         <div className="grid gap-2">
-          <label htmlFor="quantity" className="text-sm font-medium text-gray-700">
+          <label htmlFor="quantity" className="text-sm font-semibold text-purple-700">
             Quantity
           </label>
           <div className="flex items-center gap-4">
             <button
               type="button"
               onClick={() => updateQuantity(Number(form.quantity || "1") - 1)}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-300 text-lg text-gray-700 hover:bg-gray-100"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border-2 border-pink-300 text-lg text-pink-600 hover:bg-pink-100 transition-colors disabled:opacity-50"
               disabled={!selectedProduct || Number(form.quantity) <= 1}
             >
-              -
+              −
             </button>
-            <span className="min-w-4 text-center text-lg font-semibold text-gray-900">
+            <span className="min-w-8 text-center text-lg font-semibold text-purple-900">
               {form.quantity}
             </span>
             <button
               type="button"
               onClick={() => updateQuantity(Number(form.quantity || "1") + 1)}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-300 text-lg text-gray-700 hover:bg-gray-100"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border-2 border-pink-300 text-lg text-pink-600 hover:bg-pink-100 transition-colors disabled:opacity-50"
               disabled={!selectedProduct || Number(form.quantity) >= (selectedProduct?.stock ?? 1)}
             >
               +
             </button>
           </div>
           {selectedProduct && (
-            <p className="text-xs text-gray-500">{selectedProduct.stock} units available</p>
+            <p className="text-xs text-purple-600 font-medium">{selectedProduct.stock} units available</p>
           )}
         </div>
 
         <div className="grid gap-2">
-          <label htmlFor="notes" className="text-sm font-medium text-gray-700">
+          <label htmlFor="notes" className="text-sm font-semibold text-purple-700">
             Notes (optional)
           </label>
           <textarea
@@ -326,31 +397,31 @@ export function CustomerRequestForm({
             onChange={(event) =>
               setForm((prev) => ({ ...prev, notes: event.target.value }))
             }
-            className="min-h-16 rounded-xl border border-gray-300 px-4 py-3 text-sm focus:border-black focus:outline-none"
+            className="min-h-20 rounded-lg border-2 border-pink-200 bg-pink-50 px-4 py-3 text-sm text-purple-900 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-300"
             placeholder="Any special requests or questions..."
           />
         </div>
 
-        <div className="flex items-center justify-between rounded-2xl bg-stone-50 px-4 py-3 text-sm">
-          <span className="font-medium text-gray-600">Estimated total</span>
-          <span className="text-2xl font-semibold text-indigo-600">
+        <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-pink-100 to-purple-100 px-4 py-3 text-sm border-2 border-pink-200">
+          <span className="font-semibold text-purple-700">Estimated total</span>
+          <span className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
             ${estimatedTotal.toFixed(2)}
           </span>
         </div>
 
-        {error && <p className="rounded bg-red-50 p-2 text-sm text-red-600">{error}</p>}
-        {message && <p className="rounded bg-green-50 p-2 text-sm text-green-700">{message}</p>}
+        {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700 font-medium border-l-4 border-red-400">{error}</p>}
+        {message && <p className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700 font-medium border-l-4 border-emerald-400">{message}</p>}
 
         <button
           type="submit"
           disabled={submitting || loadingProducts || products.length === 0}
-          className="rounded-2xl border border-gray-300 bg-white px-4 py-3 text-base font-semibold text-gray-900 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg bg-gradient-to-r from-pink-500 to-purple-500 px-6 py-3 text-base font-semibold text-white hover:from-pink-600 hover:to-purple-600 transition-all shadow-md hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 active:scale-95"
         >
           {submitting ? "Submitting..." : "Submit request"}
         </button>
 
-        <p className="mx-auto max-w-md text-center text-sm leading-6 text-gray-500">
-          Payment is not collected here. Raquel will confirm your request and follow up via phone or DM.
+        <p className="mx-auto max-w-md text-center text-sm leading-6 text-purple-700 font-medium">
+          Raquel will confirm your request and follow up with the next steps.
         </p>
       </form>
     </section>

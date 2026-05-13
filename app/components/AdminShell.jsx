@@ -40,23 +40,23 @@ export function AdminShell({ children }) {
         return <>{children}</>;
     }
 
-    return (<div className="min-h-screen bg-gray-50 lg:grid lg:grid-cols-[240px_1fr]">
-      <aside className="border-r border-gray-200 bg-white p-4 lg:p-6">
+    return (<div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-rose-50 lg:grid lg:grid-cols-[260px_1fr]">
+      <aside className="border-r-2 border-pink-200 bg-gradient-to-b from-white to-pink-50 p-4 lg:p-6 shadow-sm">
         <div className="mb-6">
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-            Glam Goddess Shop
+          <p className="text-xs font-semibold uppercase tracking-widest text-pink-600">
+            ✨ Glam Goddess Shop
           </p>
-          <h2 className="text-xl font-bold text-gray-900">Admin Panel</h2>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">Admin Panel</h2>
         </div>
 
-        <nav className="space-y-2" aria-label="Admin navigation">
+        <nav className="space-y-1" aria-label="Admin navigation">
           {navItems.map((item) => {
             const active = isActivePath(pathname, item.href);
             return (<Link key={item.href} href={item.href} className={[
-                    "block rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    "block rounded-lg px-4 py-2.5 text-sm font-semibold transition-all",
                     active
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-100 text-gray-800 hover:bg-gray-200",
+                        ? "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-md"
+                        : "text-purple-700 hover:bg-pink-100",
                 ].join(" ")}>
                 {item.label}
               </Link>);
@@ -64,6 +64,6 @@ export function AdminShell({ children }) {
         </nav>
       </aside>
 
-      <section>{children}</section>
+      <section className="p-4 lg:p-6">{children}</section>
     </div>);
 }

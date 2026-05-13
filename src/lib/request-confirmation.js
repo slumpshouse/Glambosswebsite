@@ -30,6 +30,7 @@ export async function confirmPendingRequest(input) {
       quantity: request.quantity,
       customerPhone: input.customerPhone,
       customerName: input.customerName,
+      paymentStatus: "pending",
     });
 
     // 5) Update request status to completed and link customer

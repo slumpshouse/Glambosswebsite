@@ -39,13 +39,16 @@ export function RecentSalesTable({ sales }) {
                 Amount
               </th>
               <th className="px-6 py-3 text-left font-medium text-gray-700">
+                Payment
+              </th>
+              <th className="px-6 py-3 text-left font-medium text-gray-700">
                 Date
               </th>
             </tr>
           </thead>
           <tbody>
             {sales.length === 0 ? (<tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
                   No recent sales
                 </td>
               </tr>) : (sales.map((sale) => (<tr key={sale.id} className="border-b border-gray-200 hover:bg-gray-50">
@@ -60,6 +63,11 @@ export function RecentSalesTable({ sales }) {
                   </td>
                   <td className="px-6 py-3 text-right text-gray-900 font-medium">
                     {formatCurrency(sale.totalPrice)}
+                  </td>
+                  <td className="px-6 py-3 text-gray-600">
+                    <span className={`rounded-full px-2 py-1 text-xs font-medium ${sale.paymentStatus === "paid" ? "bg-emerald-100 text-emerald-700" : sale.paymentStatus === "failed" ? "bg-red-100 text-red-700" : "bg-slate-100 text-slate-700"}`}>
+                      {sale.paymentStatus || "pending"}
+                    </span>
                   </td>
                   <td className="px-6 py-3 text-gray-600">
                     {formatDate(sale.createdAt)}

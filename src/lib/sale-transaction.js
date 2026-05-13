@@ -2,6 +2,7 @@ import { prisma } from "./prisma";
 import { assertQuantityWithinStock } from "./request-validation";
 
 export async function executeSaleTransaction(tx, input) {
+  const paymentStatus = input.paymentStatus ?? "pending";
   const product = await tx.product.findUnique({
     where: { id: input.productId },
     select: {
@@ -54,6 +55,9 @@ export async function executeSaleTransaction(tx, input) {
       quantity: input.quantity,
       unitPrice: product.cost ?? 0,
       totalPrice: (product.cost ?? 0) * input.quantity,
+      paymentStatus,
+      currency: input.currency ?? "usd",
+      paidAt: paymentStatus === "paid" ? new Date() : null,
     },
     select: {
       id: true,
@@ -63,6 +67,9 @@ export async function executeSaleTransaction(tx, input) {
       quantity: true,
       unitPrice: true,
       totalPrice: true,
+      paymentStatus: true,
+      currency: true,
+      paidAt: true,
     },
   });
 

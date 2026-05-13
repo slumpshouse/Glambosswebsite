@@ -28,6 +28,7 @@ export async function POST(request) {
       quantity: parsed.data.quantity,
       customerPhone: parsed.data.customerPhone,
       customerName: parsed.data.customerName,
+      paymentStatus: "paid",
     });
 
     return Response.json(result, { status: 201 });

@@ -4,18 +4,18 @@ import React from "react";
  */
 export function DashboardCard({ title, value, subtitle, icon, trend, }) {
     const trendColor = {
-        up: "text-green-600",
+        up: "text-emerald-600",
         down: "text-red-600",
-        neutral: "text-gray-600",
+        neutral: "text-purple-600",
     }[trend || "neutral"];
-    return (<div className="bg-white rounded-lg shadow p-6 border border-gray-200">
+    return (<div className="bg-gradient-to-br from-white to-pink-50 rounded-lg shadow-md p-6 border-2 border-pink-100 hover:shadow-lg transition-all">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-gray-600 text-sm font-medium">{title}</p>
-          <p className="text-3xl font-bold text-gray-900 mt-2">{value}</p>
-          {subtitle && (<p className={`text-sm mt-1 ${trendColor}`}>{subtitle}</p>)}
+          <p className="text-purple-600 text-sm font-semibold">{title}</p>
+          <p className="text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent mt-2">{value}</p>
+          {subtitle && (<p className={`text-sm mt-1 font-medium ${trendColor}`}>{subtitle}</p>)}
         </div>
-        {icon && <div className="text-gray-400 text-2xl ml-4">{icon}</div>}
+        {icon && <div className="text-pink-400 text-3xl ml-4">{icon}</div>}
       </div>
     </div>);
 }

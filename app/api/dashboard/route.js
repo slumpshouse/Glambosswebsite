@@ -87,6 +87,7 @@ async function fetchRecentSales() {
     customerName: sale.customer.name || null,
     quantity: sale.quantity,
     totalPrice: sale.totalPrice,
+    paymentStatus: sale.paymentStatus,
     createdAt: sale.createdAt,
   }));
 }

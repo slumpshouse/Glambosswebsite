@@ -20,7 +20,7 @@ export default async function RequestPage() {
   return (
     <main className="mx-auto w-full max-w-3xl p-4 sm:p-6">
       {loadError && (
-        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+        <div className="mb-4 rounded-xl border-2 border-red-200 bg-red-50 p-4 text-sm text-red-700 font-medium">
           {loadError}
         </div>
       )}

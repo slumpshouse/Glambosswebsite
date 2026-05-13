@@ -54,6 +54,13 @@ export default async function MyRequestsPage() {
             cost: true,
           },
         },
+          sale: {
+            select: {
+              id: true,
+              paymentStatus: true,
+              totalPrice: true,
+            },
+          },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -95,6 +102,8 @@ export default async function MyRequestsPage() {
             const productCategory = product?.category ?? "Unknown";
             const productImage = product?.imageUrl || "https://via.placeholder.com/160?text=No+Image";
             const unitCost = safeNumber(product?.cost, 0);
+            const sale = request.sale;
+            const paymentStatus = sale?.paymentStatus || "unpaid";
 
             return (
             <article
@@ -130,6 +139,18 @@ export default async function MyRequestsPage() {
                   >
                     {request.status}
                   </span>
+                  <span
+                    className={[
+                      "ml-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold",
+                      paymentStatus === "paid"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : paymentStatus === "failed"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-slate-100 text-slate-700",
+                    ].join(" ")}
+                  >
+                    payment {paymentStatus}
+                  </span>
                   <p className="mt-2 text-gray-500">
                     {new Date(request.createdAt).toLocaleString("en-US", {
                       month: "short",
@@ -145,6 +166,17 @@ export default async function MyRequestsPage() {
               {request.notes && (
                 <div className="mt-4 rounded-lg bg-gray-50 p-3 text-sm text-gray-700">
                   {request.notes}
+                </div>
+              )}
+
+              {sale && paymentStatus !== "paid" && (
+                <div className="mt-4">
+                  <Link
+                    href={`/payments/${sale.id}`}
+                    className="inline-flex rounded bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-900"
+                  >
+                    Pay now
+                  </Link>
                 </div>
               )}
             </article>

@@ -56,6 +56,15 @@ export default function ProductsPage() {
     const submitLabel = useMemo(() => {
         return editingId ? "Update Product" : "Create Product";
     }, [editingId]);
+    const sectionOptions = useMemo(() => {
+      return Array.from(
+        new Set(
+          products
+            .map((product) => product.category?.trim())
+            .filter((category) => Boolean(category))
+        )
+      ).sort((a, b) => a.localeCompare(b));
+    }, [products]);
     function resetForm() {
         setForm(emptyForm);
         setEditingId(null);
@@ -159,7 +168,22 @@ export default function ProductsPage() {
 
       <form onSubmit={handleSubmit} className="mb-8 grid gap-3 rounded border p-4 md:grid-cols-2">
         <input className="rounded border p-2" placeholder="Name" value={form.name} onChange={(e) => setForm((prev) => (Object.assign(Object.assign({}, prev), { name: e.target.value })))} required/>
-        <input className="rounded border p-2" placeholder="Category" value={form.category} onChange={(e) => setForm((prev) => (Object.assign(Object.assign({}, prev), { category: e.target.value })))} required/>
+        <div className="grid gap-2 md:col-span-2">
+          <label htmlFor="section" className="text-sm font-semibold text-purple-700">
+            Category / Section
+          </label>
+          <input id="section" list="section-options" className="rounded border p-2" placeholder="Select an existing section or type a new one" value={form.category} onChange={(e) => setForm((prev) => (Object.assign(Object.assign({}, prev), { category: e.target.value })))} required/>
+          <datalist id="section-options">
+            {sectionOptions.map((section) => (<option key={section} value={section}/>))}
+          </datalist>
+          {sectionOptions.length > 0 && (<div className="flex flex-wrap gap-2">
+              {sectionOptions.map((section) => (<button key={section} type="button" onClick={() => setForm((prev) => (Object.assign(Object.assign({}, prev), { category: section })))} className={["rounded-full border px-3 py-1 text-xs font-medium transition-colors", form.category === section
+                      ? "border-pink-400 bg-pink-100 text-pink-700"
+                      : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100"].join(" ")}> 
+                  {section}
+                </button>))}
+            </div>)}
+        </div>
         <input className="rounded border p-2" type="number" min="0" step="0.01" placeholder="Cost (required)" value={form.cost} onChange={(e) => setForm((prev) => (Object.assign(Object.assign({}, prev), { cost: e.target.value })))} required/>
         <input className="rounded border p-2" type="number" min="0" placeholder="Stock" value={form.stock} onChange={(e) => setForm((prev) => (Object.assign(Object.assign({}, prev), { stock: e.target.value })))} required/>
         <input className="rounded border p-2" placeholder="Image URL" value={form.imageUrl} onChange={(e) => setForm((prev) => (Object.assign(Object.assign({}, prev), { imageUrl: e.target.value })))} required/>

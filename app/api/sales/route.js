@@ -18,6 +18,8 @@ export async function GET(request) {
       quantity: true,
       unitPrice: true,
       totalPrice: true,
+      paymentStatus: true,
+      paidAt: true,
       createdAt: true,
       product: {
         select: {

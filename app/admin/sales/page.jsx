@@ -48,6 +48,7 @@ export default function SalesPage() {
                 <th className="border p-2 text-left">Quantity</th>
                 <th className="border p-2 text-left">Price</th>
                 <th className="border p-2 text-left">Total</th>
+                <th className="border p-2 text-left">Payment</th>
               </tr>
             </thead>
             <tbody>
@@ -61,11 +62,16 @@ export default function SalesPage() {
                   <td className="border p-2">{sale.quantity}</td>
                   <td className="border p-2">{formatCurrency(sale.unitPrice)}</td>
                   <td className="border p-2 font-medium">{formatCurrency(sale.totalPrice)}</td>
+                  <td className="border p-2">
+                    <span className={`rounded-full px-2 py-1 text-xs font-medium ${sale.paymentStatus === "paid" ? "bg-emerald-100 text-emerald-700" : sale.paymentStatus === "failed" ? "bg-red-100 text-red-700" : "bg-slate-100 text-slate-700"}`}>
+                      {sale.paymentStatus || "pending"}
+                    </span>
+                  </td>
                 </tr>);
             })}
 
               {sales.length === 0 && (<tr>
-                  <td className="border p-2 text-center" colSpan={7}>
+                  <td className="border p-2 text-center" colSpan={8}>
                     No sales yet.
                   </td>
                 </tr>)}

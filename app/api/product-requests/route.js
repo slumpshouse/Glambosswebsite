@@ -5,6 +5,7 @@ import {
   assertQuantityWithinStock,
   createRequestSchema,
 } from "../../../src/lib/request-validation";
+import { confirmPendingRequest } from "../../../src/lib/request-confirmation";
 
 export async function GET(request) {
   const token = await requireAdminToken(request);
@@ -92,26 +93,18 @@ export async function POST(request) {
         customerId,
         notes: parsed.data.notes || undefined,
       },
-      include: {
-        product: {
-          select: {
-            id: true,
-            name: true,
-            stock: true,
-          },
-        },
-        customer: {
-          select: {
-            id: true,
-            name: true,
-            phone: true,
-          },
-        },
-      },
+      select: { id: true },
+    });
+
+    // Auto-confirm the request and create a Sale so the customer can pay immediately
+    const { sale } = await confirmPendingRequest({
+      requestId: created.id,
+      customerPhone: parsed.data.customerPhone,
+      customerName: parsed.data.customerName,
     });
 
     if (parsed.data.customerPhone) {
-      const response = NextResponse.json(created, { status: 201 });
+      const response = NextResponse.json({ saleId: sale.id }, { status: 201 });
       response.cookies.set("customer_phone", parsed.data.customerPhone, {
         httpOnly: true,
         sameSite: "lax",
@@ -121,7 +114,7 @@ export async function POST(request) {
       return response;
     }
 
-    return Response.json(created, { status: 201 });
+    return Response.json({ saleId: sale.id }, { status: 201 });
   } catch {
     return Response.json({ error: "Failed to create request" }, { status: 500 });
   }
