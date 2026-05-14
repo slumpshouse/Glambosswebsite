@@ -14,6 +14,20 @@ function safeNumber(value, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function formatPhoneInput(value) {
+  const digits = String(value ?? "").replace(/\D/g, "").slice(0, 10);
+
+  if (digits.length <= 3) {
+    return digits;
+  }
+
+  if (digits.length <= 6) {
+    return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  }
+
+  return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
   const [items, setItems] = useState([]);
@@ -192,9 +206,17 @@ export default function CheckoutPage() {
               <label className="mb-1 block text-sm font-medium text-purple-800">Phone</label>
               <input
                 value={form.customerPhone}
-                onChange={(event) => setForm((prev) => ({ ...prev, customerPhone: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    customerPhone: formatPhoneInput(event.target.value),
+                  }))
+                }
+                inputMode="tel"
+                autoComplete="tel"
+                maxLength={12}
                 className="w-full rounded-lg border border-pink-200 p-2"
-                placeholder="Phone number"
+                placeholder="123-456-7890"
               />
             </div>
             <div>

@@ -3,21 +3,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/customers", label: "Customers" },
-  { href: "/products", label: "Products" },
-  { href: "/requests", label: "Requests" },
-  { href: "/sales", label: "Sales" },
+  { href: "/admin/dashboard", label: "Dashboard" },
+  { href: "/admin/customers", label: "Customers" },
+  { href: "/admin/products", label: "Products" },
+  { href: "/admin/sales", label: "Sales" },
   { href: "/admin/sales/manual", label: "Manual Sale" },
   { href: "/admin/ai-summary", label: "AI Summary" },
 ];
 
 const adminPrefixes = [
-  "/dashboard",
-  "/products",
-  "/requests",
-  "/customers",
-  "/sales",
+  "/admin/dashboard",
+  "/admin/products",
+  "/admin/customers",
+  "/admin/sales",
   "/admin",
 ];
 
@@ -27,14 +25,21 @@ function isAdminPath(pathname) {
   );
 }
 
-function isActivePath(pathname, href) {
-    if (href === "/dashboard") {
-        return pathname === "/dashboard";
-    }
-    return pathname === href || pathname.startsWith(`${href}/`);
+function getActiveHref(pathname) {
+  const normalizedPath = pathname === "/dashboard" ? "/admin/dashboard" : pathname;
+
+  const matches = navItems
+    .map((item) => item.href)
+    .filter(
+      (href) => normalizedPath === href || normalizedPath.startsWith(`${href}/`)
+    )
+    .sort((a, b) => b.length - a.length);
+
+  return matches[0] ?? null;
 }
 export function AdminShell({ children }) {
     const pathname = usePathname();
+    const activeHref = getActiveHref(pathname);
 
   if (!isAdminPath(pathname) || pathname === "/login" || pathname === "/admin/login") {
         return <>{children}</>;
@@ -51,7 +56,7 @@ export function AdminShell({ children }) {
 
         <nav className="space-y-1" aria-label="Admin navigation">
           {navItems.map((item) => {
-            const active = isActivePath(pathname, item.href);
+            const active = activeHref === item.href;
             return (<Link key={item.href} href={item.href} className={[
                     "block rounded-lg px-4 py-2.5 text-sm font-semibold transition-all",
                     active

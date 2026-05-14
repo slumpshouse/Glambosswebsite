@@ -31,52 +31,66 @@ export default function SalesPage() {
         }
         void loadSales();
     }, []);
-    return (<main className="mx-auto max-w-6xl p-6">
-      <h1 className="mb-6 text-3xl font-semibold">Sales</h1>
+    return (<main className="mx-auto max-w-7xl p-4 sm:p-6">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">Sales</h1>
+        <p className="mt-2 text-sm text-purple-800 sm:text-base">Track all recorded sales and payment statuses in one place.</p>
+      </div>
 
-      {loading && <p>Loading sales...</p>}
-      {error && <p className="mb-4 text-red-600">{error}</p>}
+      {loading && (<div className="rounded-2xl border-2 border-pink-200 bg-white/80 p-6 text-center text-sm font-medium text-purple-800 shadow-sm">
+          Loading sales...
+        </div>)}
 
-      {!loading && !error && (<div className="overflow-x-auto rounded border">
-          <table className="min-w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border p-2 text-left">Date</th>
-                <th className="border p-2 text-left">Product</th>
-                <th className="border p-2 text-left">Customer</th>
-                <th className="border p-2 text-left">Phone</th>
-                <th className="border p-2 text-left">Quantity</th>
-                <th className="border p-2 text-left">Price</th>
-                <th className="border p-2 text-left">Total</th>
-                <th className="border p-2 text-left">Payment</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sales.map((sale) => {
+      {error && (<div className="mb-4 rounded-xl border-l-4 border-red-500 bg-red-50 p-4 text-sm font-medium text-red-700">
+          {error}
+        </div>)}
+
+      {!loading && !error && (<section className="overflow-hidden rounded-2xl border-2 border-pink-200 bg-white/90 shadow-lg">
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead className="bg-gradient-to-r from-pink-50 to-purple-50">
+                <tr>
+                  <th className="border-b border-pink-200 px-4 py-3 text-left text-sm font-semibold text-purple-900">Date</th>
+                  <th className="border-b border-pink-200 px-4 py-3 text-left text-sm font-semibold text-purple-900">Product</th>
+                  <th className="border-b border-pink-200 px-4 py-3 text-left text-sm font-semibold text-purple-900">Customer</th>
+                  <th className="border-b border-pink-200 px-4 py-3 text-left text-sm font-semibold text-purple-900">Phone</th>
+                  <th className="border-b border-pink-200 px-4 py-3 text-left text-sm font-semibold text-purple-900">Quantity</th>
+                  <th className="border-b border-pink-200 px-4 py-3 text-left text-sm font-semibold text-purple-900">Price</th>
+                  <th className="border-b border-pink-200 px-4 py-3 text-left text-sm font-semibold text-purple-900">Total</th>
+                  <th className="border-b border-pink-200 px-4 py-3 text-left text-sm font-semibold text-purple-900">Payment</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sales.map((sale, index) => {
                 var _a;
-                return (<tr key={sale.id}>
-                  <td className="border p-2">{formatDate(sale.createdAt)}</td>
-                  <td className="border p-2">{sale.product.name}</td>
-                  <td className="border p-2">{(_a = sale.customer.name) !== null && _a !== void 0 ? _a : "-"}</td>
-                  <td className="border p-2">{sale.customer.phone}</td>
-                  <td className="border p-2">{sale.quantity}</td>
-                  <td className="border p-2">{formatCurrency(sale.unitPrice)}</td>
-                  <td className="border p-2 font-medium">{formatCurrency(sale.totalPrice)}</td>
-                  <td className="border p-2">
-                    <span className={`rounded-full px-2 py-1 text-xs font-medium ${sale.paymentStatus === "paid" ? "bg-emerald-100 text-emerald-700" : sale.paymentStatus === "failed" ? "bg-red-100 text-red-700" : "bg-slate-100 text-slate-700"}`}>
-                      {sale.paymentStatus || "pending"}
-                    </span>
-                  </td>
-                </tr>);
+                return (<tr key={sale.id} className={index % 2 === 0 ? "bg-white" : "bg-pink-50/40"}>
+                    <td className="border-b border-pink-100 px-4 py-3 text-sm text-purple-800 whitespace-nowrap">{formatDate(sale.createdAt)}</td>
+                    <td className="border-b border-pink-100 px-4 py-3 text-base font-medium text-purple-900">{sale.product.name}</td>
+                    <td className="border-b border-pink-100 px-4 py-3 text-base text-purple-900">{(_a = sale.customer.name) !== null && _a !== void 0 ? _a : "-"}</td>
+                    <td className="border-b border-pink-100 px-4 py-3 text-base text-purple-900 whitespace-nowrap">{sale.customer.phone}</td>
+                    <td className="border-b border-pink-100 px-4 py-3 text-base font-semibold text-purple-900">{sale.quantity}</td>
+                    <td className="border-b border-pink-100 px-4 py-3 text-base text-purple-900 whitespace-nowrap">{formatCurrency(sale.unitPrice)}</td>
+                    <td className="border-b border-pink-100 px-4 py-3 text-base font-semibold text-pink-700 whitespace-nowrap">{formatCurrency(sale.totalPrice)}</td>
+                    <td className="border-b border-pink-100 px-4 py-3">
+                      <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${sale.paymentStatus === "paid"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : sale.paymentStatus === "failed"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-amber-100 text-amber-700"}`}>
+                        {sale.paymentStatus === "paid" ? "completed" : sale.paymentStatus || "pending"}
+                      </span>
+                    </td>
+                  </tr>);
             })}
 
-              {sales.length === 0 && (<tr>
-                  <td className="border p-2 text-center" colSpan={8}>
-                    No sales yet.
-                  </td>
-                </tr>)}
-            </tbody>
-          </table>
-        </div>)}
+                {sales.length === 0 && (<tr>
+                    <td className="px-4 py-10 text-center text-sm font-medium text-purple-700" colSpan={8}>
+                      No sales yet.
+                    </td>
+                  </tr>)}
+              </tbody>
+            </table>
+          </div>
+        </section>)}
     </main>);
 }

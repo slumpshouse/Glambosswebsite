@@ -2,6 +2,7 @@ import { z } from "zod";
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
 import { assertQuantityWithinStock } from "@/src/lib/request-validation";
+import { normalizePhone } from "@/src/lib/phone-normalization";
 
 const cartCheckoutSchema = z.object({
   customerName: z.string().trim().min(1, "Customer name is required").max(100),
@@ -44,13 +45,14 @@ export async function POST(request) {
     }
 
     const items = aggregateItems(parsed.data.items);
+    const normalizedPhone = normalizePhone(parsed.data.customerPhone);
 
     const checkout = await prisma.$transaction(async (tx) => {
       const customer = await tx.customer.upsert({
-        where: { phone: parsed.data.customerPhone },
+        where: { phone: normalizedPhone },
         update: { name: parsed.data.customerName },
         create: {
-          phone: parsed.data.customerPhone,
+          phone: normalizedPhone,
           name: parsed.data.customerName,
         },
         select: { id: true },
@@ -82,17 +84,6 @@ export async function POST(request) {
 
         assertQuantityWithinStock(item.quantity, product.stock);
 
-        const createdRequest = await tx.request.create({
-          data: {
-            productId: item.productId,
-            quantity: item.quantity,
-            status: "completed",
-            customerId: customer.id,
-            notes: parsed.data.notes || undefined,
-          },
-          select: { id: true },
-        });
-
         await tx.product.update({
           where: { id: item.productId },
           data: {
@@ -104,7 +95,6 @@ export async function POST(request) {
 
         const sale = await tx.sale.create({
           data: {
-            requestId: createdRequest.id,
             productId: item.productId,
             customerId: customer.id,
             quantity: item.quantity,
@@ -130,7 +120,7 @@ export async function POST(request) {
       { status: 201 }
     );
 
-    response.cookies.set("customer_phone", parsed.data.customerPhone, {
+    response.cookies.set("customer_phone", normalizedPhone, {
       httpOnly: true,
       sameSite: "lax",
       path: "/",

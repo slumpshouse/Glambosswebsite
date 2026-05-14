@@ -1,8 +1,10 @@
 import { prisma } from "./prisma";
 import { assertQuantityWithinStock } from "./request-validation";
+import { normalizePhone } from "./phone-normalization";
 
 export async function executeSaleTransaction(tx, input) {
   const paymentStatus = input.paymentStatus ?? "pending";
+  const normalizedPhone = normalizePhone(input.customerPhone);
   const product = await tx.product.findUnique({
     where: { id: input.productId },
     select: {
@@ -21,12 +23,12 @@ export async function executeSaleTransaction(tx, input) {
 
   // 4) Create or link customer by unique phone
   const customer = await tx.customer.upsert({
-    where: { phone: input.customerPhone },
+    where: { phone: normalizedPhone },
     update: {
       name: input.customerName ?? undefined,
     },
     create: {
-      phone: input.customerPhone,
+      phone: normalizedPhone,
       name: input.customerName,
     },
     select: {

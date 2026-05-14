@@ -50,7 +50,7 @@ export default function CustomerDetailPage() {
   return (
     <main className="mx-auto max-w-6xl p-6">
       <div className="mb-4">
-        <Link href="/customers" className="text-sm text-blue-700 hover:underline">
+        <Link href="/admin/customers" className="text-sm text-blue-700 hover:underline">
           Back to Customers
         </Link>
       </div>

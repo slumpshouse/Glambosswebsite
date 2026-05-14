@@ -109,9 +109,6 @@ export default function RootPage() {
         const productCost = safeNumber(product?.cost, 0);
         const productStock = safeNumber(product?.stock, 0);
         const quantityInCart = getCartQuantity(product.id);
-        const requestHref = `/request?product=${product.id}${
-            quantityInCart > 0 ? `&quantity=${quantityInCart}` : ""
-        }`;
         const isAvailable = sectionType === "available";
 
         return (
@@ -165,18 +162,6 @@ export default function RootPage() {
                                     : "Add to cart"
                                 : "Not Available"}
                         </button>
-                        {isAvailable ? (
-                            <Link
-                                href={requestHref}
-                                className="rounded-lg border-2 border-pink-300 px-3 py-1.5 text-sm font-semibold text-pink-600 bg-white hover:bg-pink-50 transition-all"
-                            >
-                                Request
-                            </Link>
-                        ) : (
-                            <span className="rounded-lg border-2 border-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-500 bg-slate-50">
-                                Request Disabled
-                            </span>
-                        )}
                     </div>
                 </div>
             </article>

@@ -6,11 +6,10 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const adminPrefixes = [
-  "/dashboard",
-  "/products",
-  "/requests",
-  "/customers",
-  "/sales",
+  "/admin/dashboard",
+  "/admin/products",
+  "/admin/customers",
+  "/admin/sales",
   "/admin",
 ];
 
@@ -75,73 +74,30 @@ export function Navbar() {
         </Link>
 
         <nav className="flex items-center gap-2">
-          {authenticated ? (
-            <>
-              {adminRoute && (
-                <Link
-                  href="/"
-                  className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
-                >
-                  View Customer Site
-                </Link>
-              )}
-              {customerRoute && (
-                <Link
-                  href="/checkout"
-                  className="rounded-md bg-black px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-900"
-                >
-                  Cart ({cartCount})
-                </Link>
-              )}
-              {customerRoute && (
-                <Link
-                  href="/my-requests"
-                  className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
-                >
-                  My Request
-                </Link>
-              )}
-              {adminRoute && (
-                <Link
-                  href="/dashboard"
-                  className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
-                >
-                  Dashboard
-                </Link>
-              )}
-              <button
-                type="button"
-                onClick={() => signOut({ callbackUrl: "/" })}
-                className="rounded-md bg-black px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-900"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <>
-              {customerRoute && (
-                <Link
-                  href="/checkout"
-                  className="rounded-md bg-black px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-900"
-                >
-                  Cart ({cartCount})
-                </Link>
-              )}
-              {customerRoute && (
-                <Link
-                  href="/my-requests"
-                  className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100"
-                >
-                  My Request
-                </Link>
-              )}
-              <Link
-                href="/login"
-                className="rounded-md bg-black px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-900"
-              >
-                Admin Login
-              </Link>
-            </>
+          {customerRoute && (
+            <Link
+              href="/checkout"
+              className="rounded-md bg-black px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-900"
+            >
+              Cart ({cartCount})
+            </Link>
+          )}
+          {adminRoute && authenticated && (
+            <button
+              type="button"
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="rounded-md bg-black px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-900"
+            >
+              Logout
+            </button>
+          )}
+          {!authenticated && (
+            <Link
+              href="/admin/login"
+              className="rounded-md bg-black px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-900"
+            >
+              Admin Login
+            </Link>
           )}
         </nav>
       </div>

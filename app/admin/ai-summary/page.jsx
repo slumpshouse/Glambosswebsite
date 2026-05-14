@@ -8,7 +8,6 @@ export default function AiSummaryPage() {
     const [weekEnd, setWeekEnd] = useState("");
     const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState(false);
-    const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
     useEffect(() => {
@@ -42,6 +41,11 @@ export default function AiSummaryPage() {
         var _a;
         return (_a = aggregate === null || aggregate === void 0 ? void 0 : aggregate.totals.revenue) !== null && _a !== void 0 ? _a : 0;
     }, [aggregate]);
+    const periodLabel = useMemo(() => {
+      if (!weekStart || !weekEnd)
+        return "Current reporting period";
+      return `${new Date(weekStart).toLocaleDateString()} - ${new Date(weekEnd).toLocaleDateString()}`;
+    }, [weekStart, weekEnd]);
     async function handleGenerateSummary() {
         var _a, _b;
         setGenerating(true);
@@ -70,121 +74,91 @@ export default function AiSummaryPage() {
             setStructured(body.structured);
         }
         setEditableSummary((_b = body.editableSummary) !== null && _b !== void 0 ? _b : "");
-        setSuccess("Summary generated. Review and edit before saving.");
+        setSuccess("Summary generated.");
         setGenerating(false);
     }
-    async function handleSaveSummary() {
-        var _a;
-        if (!aggregate || !structured || !editableSummary.trim()) {
-            setError("Generate and edit a summary before saving.");
-            return;
-        }
-        setSaving(true);
-        setError(null);
-        setSuccess(null);
-        const response = await fetch("/api/sales/weekly-summary", {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                weekStart,
-                weekEnd,
-                editableSummary,
-                structured,
-                aggregate,
-            }),
-        });
-        const body = (await response.json().catch(() => ({})));
-        if (!response.ok) {
-            setError((_a = body.error) !== null && _a !== void 0 ? _a : "Failed to save summary.");
-            setSaving(false);
-            return;
-        }
-        setSuccess("Summary saved successfully.");
-        setSaving(false);
-    }
-    return (<main className="mx-auto max-w-6xl p-6">
-      <h1 className="mb-6 text-3xl font-semibold">Weekly AI Sales Summary</h1>
+    return (<main className="mx-auto max-w-7xl p-4 sm:p-6">
+      <div className="mb-6 rounded-2xl border border-pink-200 bg-gradient-to-r from-white via-pink-50 to-purple-50 p-5 shadow-sm sm:mb-8 sm:p-6">
+        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent sm:text-4xl">Weekly AI Sales Summary</h1>
+        <p className="mt-2 text-sm text-purple-900/80 sm:text-base">{periodLabel}</p>
+      </div>
 
-      {loading ? (<p>Loading weekly sales data...</p>) : (<div className="space-y-6">
-          {aggregate && (<section className="grid gap-4 rounded border p-4 md:grid-cols-3">
-              <div>
-                <p className="text-sm text-gray-500">Week Revenue</p>
-                <p className="text-2xl font-semibold">${totalRevenue.toFixed(2)}</p>
+      {loading ? (<div className="rounded-2xl border-2 border-pink-200 bg-white p-8 text-center shadow-sm">
+          <p className="text-sm font-medium text-purple-800">Loading weekly sales data...</p>
+        </div>) : (<div className="space-y-6">
+          {aggregate && (<section className="grid gap-4 md:grid-cols-3">
+              <div className="rounded-2xl border-2 border-pink-200 bg-white p-5 shadow-sm">
+                <p className="text-xs font-semibold uppercase tracking-wide text-purple-600">Week Revenue</p>
+                <p className="mt-2 text-3xl font-bold text-pink-700">${totalRevenue.toFixed(2)}</p>
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Sales Count</p>
-                <p className="text-2xl font-semibold">{aggregate.totals.salesCount}</p>
+              <div className="rounded-2xl border-2 border-pink-200 bg-white p-5 shadow-sm">
+                <p className="text-xs font-semibold uppercase tracking-wide text-purple-600">Sales Count</p>
+                <p className="mt-2 text-3xl font-bold text-purple-800">{aggregate.totals.salesCount}</p>
               </div>
-              <div>
-                <p className="text-sm text-gray-500">Units Sold</p>
-                <p className="text-2xl font-semibold">{aggregate.totals.unitsSold}</p>
+              <div className="rounded-2xl border-2 border-pink-200 bg-white p-5 shadow-sm">
+                <p className="text-xs font-semibold uppercase tracking-wide text-purple-600">Units Sold</p>
+                <p className="mt-2 text-3xl font-bold text-purple-800">{aggregate.totals.unitsSold}</p>
               </div>
             </section>)}
 
           {aggregate && (<section className="grid gap-4 md:grid-cols-2">
-              <div className="rounded border p-4">
-                <h2 className="mb-2 text-lg font-semibold">Product Volume</h2>
-                <ul className="space-y-1 text-sm">
-                  {aggregate.productVolume.slice(0, 8).map((row) => (<li key={row.productId}>
-                      {row.productName}: {row.unitsSold} units (${row.revenue.toFixed(2)})
+              <div className="rounded-2xl border-2 border-pink-200 bg-white p-5 shadow-sm">
+                <h2 className="mb-3 text-2xl font-bold text-purple-900">Product Volume</h2>
+                <ul className="space-y-2 text-sm text-purple-800">
+                  {aggregate.productVolume.slice(0, 8).map((row) => (<li key={row.productId} className="rounded-lg bg-pink-50 px-3 py-2">
+                      <span className="font-semibold">{row.productName}</span>: {row.unitsSold} units (${row.revenue.toFixed(2)})
                     </li>))}
                 </ul>
               </div>
 
-              <div className="rounded border p-4">
-                <h2 className="mb-2 text-lg font-semibold">Customer Trends</h2>
-                <p className="text-sm">New customers this week: {aggregate.customerTrends.newCustomers}</p>
-                <p className="mb-2 text-sm">Repeat customers this week: {aggregate.customerTrends.repeatCustomers}</p>
-                <ul className="space-y-1 text-sm">
+              <div className="rounded-2xl border-2 border-pink-200 bg-white p-5 shadow-sm">
+                <h2 className="mb-3 text-2xl font-bold text-purple-900">Customer Trends</h2>
+                <p className="text-sm text-purple-800">New customers this week: <span className="font-semibold">{aggregate.customerTrends.newCustomers}</span></p>
+                <p className="mb-3 text-sm text-purple-800">Repeat customers this week: <span className="font-semibold">{aggregate.customerTrends.repeatCustomers}</span></p>
+                <ul className="space-y-2 text-sm text-purple-800">
                   {aggregate.customerTrends.topCustomers.map((row) => {
                     var _a;
-                    return (<li key={row.customerId}>
-                      {(_a = row.customerName) !== null && _a !== void 0 ? _a : row.customerPhone}: {row.orders} orders (${row.revenue.toFixed(2)})
+                    return (<li key={row.customerId} className="rounded-lg bg-pink-50 px-3 py-2">
+                      <span className="font-semibold">{(_a = row.customerName) !== null && _a !== void 0 ? _a : row.customerPhone}</span>: {row.orders} orders (${row.revenue.toFixed(2)})
                     </li>);
                 })}
                 </ul>
               </div>
 
-              <div className="rounded border p-4">
-                <h2 className="mb-2 text-lg font-semibold">Top Inventory</h2>
-                <ul className="space-y-1 text-sm">
-                  {aggregate.inventory.top.map((item) => (<li key={item.productId}>
-                      {item.productName}: {item.stock}
+              <div className="rounded-2xl border-2 border-pink-200 bg-white p-5 shadow-sm">
+                <h2 className="mb-3 text-2xl font-bold text-purple-900">Top Inventory</h2>
+                <ul className="space-y-2 text-sm text-purple-800">
+                  {aggregate.inventory.top.map((item) => (<li key={item.productId} className="rounded-lg bg-pink-50 px-3 py-2">
+                      <span className="font-semibold">{item.productName}</span>: {item.stock}
                     </li>))}
                 </ul>
               </div>
 
-              <div className="rounded border p-4">
-                <h2 className="mb-2 text-lg font-semibold">Bottom Inventory</h2>
-                <ul className="space-y-1 text-sm">
-                  {aggregate.inventory.bottom.map((item) => (<li key={item.productId}>
-                      {item.productName}: {item.stock}
+              <div className="rounded-2xl border-2 border-pink-200 bg-white p-5 shadow-sm">
+                <h2 className="mb-3 text-2xl font-bold text-purple-900">Bottom Inventory</h2>
+                <ul className="space-y-2 text-sm text-purple-800">
+                  {aggregate.inventory.bottom.map((item) => (<li key={item.productId} className="rounded-lg bg-pink-50 px-3 py-2">
+                      <span className="font-semibold">{item.productName}</span>: {item.stock}
                     </li>))}
                 </ul>
               </div>
             </section>)}
 
-          <section className="rounded border p-4">
-            <div className="mb-3 flex flex-wrap gap-2">
-              <button type="button" onClick={() => void handleGenerateSummary()} disabled={generating} className="rounded bg-black hover:bg-gray-900 active:bg-gray-950 px-4 py-2 text-white font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+          <section className="rounded-2xl border-2 border-pink-200 bg-white p-5 shadow-sm sm:p-6">
+            <div className="mb-4 flex flex-wrap gap-2">
+              <button type="button" onClick={() => void handleGenerateSummary()} disabled={generating} className="rounded-lg bg-gradient-to-r from-pink-500 to-purple-500 px-5 py-2.5 text-sm font-semibold text-white shadow transition-all hover:from-pink-600 hover:to-purple-600 disabled:cursor-not-allowed disabled:opacity-60">
                 {generating ? "Generating..." : "Generate AI Summary"}
-              </button>
-
-              <button type="button" onClick={() => void handleSaveSummary()} disabled={saving || !editableSummary.trim()} className="rounded bg-green-600 hover:bg-green-700 active:bg-green-800 px-4 py-2 text-white font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
-                {saving ? "Saving..." : "Save Summary"}
               </button>
             </div>
 
-            <label htmlFor="summary" className="mb-2 block text-sm font-medium text-gray-700">
-              Editable Summary Draft
+            <label htmlFor="summary" className="mb-2 block text-sm font-semibold text-purple-700">
+              AI Summary
             </label>
-            <textarea id="summary" className="min-h-[240px] w-full rounded border p-3 text-sm" value={editableSummary} onChange={(event) => setEditableSummary(event.target.value)} placeholder="Generate a summary, edit it, then save."/>
+            <textarea id="summary" readOnly className="min-h-[260px] w-full cursor-default rounded-xl border-2 border-pink-200 bg-pink-50/30 p-4 text-sm text-purple-900 placeholder:text-purple-300 outline-none" value={editableSummary} placeholder="Generate a summary to view it here."/>
           </section>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          {success && <p className="text-sm text-green-700">{success}</p>}
+          {error && (<div className="rounded-xl border-l-4 border-red-500 bg-red-50 p-4 text-sm font-medium text-red-700">{error}</div>)}
+          {success && (<div className="rounded-xl border-l-4 border-emerald-500 bg-emerald-50 p-4 text-sm font-medium text-emerald-700">{success}</div>)}
         </div>)}
     </main>);
 }

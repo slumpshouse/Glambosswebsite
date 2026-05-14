@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { prisma } from "@/src/lib/prisma";
 import { requireAdminToken } from "@/src/lib/require-admin-token";
+import { normalizePhone } from "@/src/lib/phone-normalization";
 
 const paramsSchema = z.object({
   id: z.coerce.number().int().positive(),
@@ -56,14 +57,28 @@ export async function GET(request, context) {
     return Response.json({ error: "Customer not found" }, { status: 404 });
   }
 
+  const normalizedPhone = normalizePhone(customer.phone);
+  const relatedCustomers = await prisma.customer.findMany({
+    select: {
+      id: true,
+      phone: true,
+    },
+  });
+
+  const relatedCustomerIds = relatedCustomers
+    .filter((item) => normalizePhone(item.phone) === normalizedPhone)
+    .map((item) => item.id);
+
+  const customerIdsForMetrics = relatedCustomerIds.length > 0 ? relatedCustomerIds : [customerId];
+
   const [summary, sales] = await Promise.all([
     prisma.sale.aggregate({
-      where: { customerId },
+      where: { customerId: { in: customerIdsForMetrics } },
       _sum: { totalPrice: true },
       _count: { _all: true },
     }),
     prisma.sale.findMany({
-      where: { customerId },
+      where: { customerId: { in: customerIdsForMetrics } },
       orderBy: { createdAt: "desc" },
       take: limit + 1,
       select: {

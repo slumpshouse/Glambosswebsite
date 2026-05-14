@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { prisma } from "@/src/lib/prisma";
 import { requireAdminToken } from "@/src/lib/require-admin-token";
+import { normalizePhone } from "@/src/lib/phone-normalization";
 
 const searchQuerySchema = z.object({
   q: z.string().trim().min(1).max(100),
@@ -46,7 +47,22 @@ export async function GET(request) {
     return Response.json({ query, results: [] });
   }
 
-  const customerIds = customers.map((customer) => customer.id);
+  const normalizedPhones = new Set(customers.map((customer) => normalizePhone(customer.phone)));
+
+  const allCustomers = await prisma.customer.findMany({
+    select: {
+      id: true,
+      phone: true,
+    },
+  });
+
+  const relatedCustomerIds = allCustomers
+    .filter((customer) => normalizedPhones.has(normalizePhone(customer.phone)))
+    .map((customer) => customer.id);
+
+  const customerIds = relatedCustomerIds.length > 0
+    ? relatedCustomerIds
+    : customers.map((customer) => customer.id);
 
   const salesByCustomer = await prisma.sale.groupBy({
     by: ["customerId"],
@@ -65,10 +81,29 @@ export async function GET(request) {
     ])
   );
 
+  const customerMetricsByNormalizedPhone = new Map();
+
+  for (const customer of allCustomers) {
+    const normalizedPhone = normalizePhone(customer.phone);
+    if (!normalizedPhones.has(normalizedPhone)) {
+      continue;
+    }
+
+    const existing = customerMetricsByNormalizedPhone.get(normalizedPhone) ?? {
+      totalSpend: 0,
+      purchaseFrequency: 0,
+    };
+
+    const directMetrics = salesMap.get(customer.id);
+    existing.totalSpend += directMetrics?.totalSpend ?? 0;
+    existing.purchaseFrequency += directMetrics?.purchaseFrequency ?? 0;
+    customerMetricsByNormalizedPhone.set(normalizedPhone, existing);
+  }
+
   const payload = {
     query,
     results: customers.map((customer) => {
-      const metrics = salesMap.get(customer.id);
+      const metrics = customerMetricsByNormalizedPhone.get(normalizePhone(customer.phone));
       return {
         id: customer.id,
         name: customer.name,

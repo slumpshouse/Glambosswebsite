@@ -18,58 +18,58 @@ export function RecentSalesTable({ sales }) {
             currency: "USD",
         }).format(value);
     };
-    return (<div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">Recent Sales</h3>
+    return (<div className="overflow-hidden rounded-2xl border-2 border-pink-200 bg-white shadow-lg">
+      <div className="border-b border-pink-200 bg-gradient-to-r from-pink-50 to-purple-50 px-5 py-4">
+        <h3 className="text-2xl font-bold text-purple-900">Recent Sales</h3>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b border-gray-200">
+        <table className="min-w-[760px] w-full text-sm">
+          <thead className="bg-white border-b border-pink-200">
             <tr>
-              <th className="px-6 py-3 text-left font-medium text-gray-700">
+              <th className="px-4 py-3 text-left font-semibold text-purple-900">
                 Product
               </th>
-              <th className="px-6 py-3 text-left font-medium text-gray-700">
+              <th className="px-4 py-3 text-left font-semibold text-purple-900">
                 Customer
               </th>
-              <th className="px-6 py-3 text-right font-medium text-gray-700">
+              <th className="px-4 py-3 text-right font-semibold text-purple-900">
                 Qty
               </th>
-              <th className="px-6 py-3 text-right font-medium text-gray-700">
+              <th className="px-4 py-3 text-right font-semibold text-purple-900">
                 Amount
               </th>
-              <th className="px-6 py-3 text-left font-medium text-gray-700">
+              <th className="px-4 py-3 text-left font-semibold text-purple-900">
                 Payment
               </th>
-              <th className="px-6 py-3 text-left font-medium text-gray-700">
+              <th className="px-4 py-3 text-left font-semibold text-purple-900">
                 Date
               </th>
             </tr>
           </thead>
           <tbody>
             {sales.length === 0 ? (<tr>
-                <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                <td colSpan={6} className="px-6 py-10 text-center text-purple-700 font-medium">
                   No recent sales
                 </td>
               </tr>) : (sales.map((sale) => (<tr key={sale.id} className="border-b border-gray-200 hover:bg-gray-50">
-                  <td className="px-6 py-3 text-gray-900">
+                  <td className="px-4 py-3 text-purple-900">
                     <span className="font-medium">{sale.productName}</span>
                   </td>
-                  <td className="px-6 py-3 text-gray-600">
+                  <td className="px-4 py-3 text-purple-700">
                     {sale.customerName || "Unknown"}
                   </td>
-                  <td className="px-6 py-3 text-right text-gray-900">
+                  <td className="px-4 py-3 text-right text-purple-900">
                     {sale.quantity}
                   </td>
-                  <td className="px-6 py-3 text-right text-gray-900 font-medium">
+                  <td className="px-4 py-3 text-right text-purple-900 font-semibold">
                     {formatCurrency(sale.totalPrice)}
                   </td>
-                  <td className="px-6 py-3 text-gray-600">
+                  <td className="px-4 py-3 text-purple-700">
                     <span className={`rounded-full px-2 py-1 text-xs font-medium ${sale.paymentStatus === "paid" ? "bg-emerald-100 text-emerald-700" : sale.paymentStatus === "failed" ? "bg-red-100 text-red-700" : "bg-slate-100 text-slate-700"}`}>
-                      {sale.paymentStatus || "pending"}
+                      {sale.paymentStatus === "paid" ? "completed" : sale.paymentStatus || "pending"}
                     </span>
                   </td>
-                  <td className="px-6 py-3 text-gray-600">
+                  <td className="px-4 py-3 text-purple-700 whitespace-nowrap">
                     {formatDate(sale.createdAt)}
                   </td>
                 </tr>)))}

@@ -3,12 +3,15 @@
 import { useEffect, useState } from "react";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
+import { useRouter } from "next/navigation";
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "");
+const REDIRECT_DELAY_MS = 30000;
 
 function CheckoutForm({ saleId, onPaid }) {
   const stripe = useStripe();
   const elements = useElements();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
@@ -25,7 +28,7 @@ function CheckoutForm({ saleId, onPaid }) {
     const result = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/payments/${saleId}`,
+        return_url: `${window.location.origin}/`,
       },
       redirect: "if_required",
     });
@@ -37,8 +40,11 @@ function CheckoutForm({ saleId, onPaid }) {
     }
 
     onPaid?.();
-    setMessage("Payment submitted successfully.");
+    setMessage("Payment successful. Redirecting to product page in 30 seconds...");
     setLoading(false);
+    window.setTimeout(() => {
+      router.replace("/");
+    }, REDIRECT_DELAY_MS);
   }
 
   return (

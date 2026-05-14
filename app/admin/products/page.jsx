@@ -163,88 +163,103 @@ export default function ProductsPage() {
             setError(err instanceof Error ? err.message : "Failed to import image.");
         }
     }
-    return (<main className="mx-auto max-w-6xl p-6">
-      <h1 className="mb-6 text-3xl font-semibold">Products</h1>
+    return (<main className="mx-auto max-w-7xl p-4 sm:p-6">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">Products</h1>
+        <p className="mt-2 text-sm text-purple-800 sm:text-base">Create and manage catalog items, pricing, and stock levels.</p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="mb-8 grid gap-3 rounded border p-4 md:grid-cols-2">
-        <input className="rounded border p-2" placeholder="Name" value={form.name} onChange={(e) => setForm((prev) => (Object.assign(Object.assign({}, prev), { name: e.target.value })))} required/>
-        <div className="grid gap-2 md:col-span-2">
-          <label htmlFor="section" className="text-sm font-semibold text-purple-700">
-            Category / Section
-          </label>
-          <input id="section" list="section-options" className="rounded border p-2" placeholder="Select an existing section or type a new one" value={form.category} onChange={(e) => setForm((prev) => (Object.assign(Object.assign({}, prev), { category: e.target.value })))} required/>
-          <datalist id="section-options">
-            {sectionOptions.map((section) => (<option key={section} value={section}/>))}
-          </datalist>
-          {sectionOptions.length > 0 && (<div className="flex flex-wrap gap-2">
-              {sectionOptions.map((section) => (<button key={section} type="button" onClick={() => setForm((prev) => (Object.assign(Object.assign({}, prev), { category: section })))} className={["rounded-full border px-3 py-1 text-xs font-medium transition-colors", form.category === section
-                      ? "border-pink-400 bg-pink-100 text-pink-700"
-                      : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100"].join(" ")}> 
-                  {section}
-                </button>))}
+      <section className="mb-8 rounded-2xl border-2 border-pink-200 bg-white/90 p-5 shadow-lg sm:p-6">
+        <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
+          <input className="rounded-lg border-2 border-pink-200 bg-white px-3 py-2.5 text-gray-900 placeholder:text-purple-300 outline-none transition-colors focus:border-pink-500" placeholder="Name" value={form.name} onChange={(e) => setForm((prev) => (Object.assign(Object.assign({}, prev), { name: e.target.value })))} required/>
+
+          <div className="grid gap-2 md:col-span-2">
+            <label htmlFor="section" className="text-sm font-semibold text-purple-700">
+              Category / Section
+            </label>
+            <input id="section" list="section-options" className="rounded-lg border-2 border-pink-200 bg-white px-3 py-2.5 text-gray-900 placeholder:text-purple-300 outline-none transition-colors focus:border-pink-500" placeholder="Select an existing section or type a new one" value={form.category} onChange={(e) => setForm((prev) => (Object.assign(Object.assign({}, prev), { category: e.target.value })))} required/>
+            <datalist id="section-options">
+              {sectionOptions.map((section) => (<option key={section} value={section}/>))}
+            </datalist>
+
+            {sectionOptions.length > 0 && (<div className="flex flex-wrap gap-2 pt-1">
+                {sectionOptions.map((section) => (<button key={section} type="button" onClick={() => setForm((prev) => (Object.assign(Object.assign({}, prev), { category: section })))} className={["rounded-full border px-3 py-1 text-xs font-semibold transition-colors", form.category === section
+                        ? "border-pink-400 bg-pink-100 text-pink-700"
+                        : "border-gray-200 bg-white text-gray-700 hover:bg-gray-100"].join(" ")}>
+                    {section}
+                  </button>))}
+              </div>)}
+          </div>
+
+          <input className="rounded-lg border-2 border-pink-200 bg-white px-3 py-2.5 text-gray-900 placeholder:text-purple-300 outline-none transition-colors focus:border-pink-500" type="number" min="0" step="0.01" placeholder="Cost (required)" value={form.cost} onChange={(e) => setForm((prev) => (Object.assign(Object.assign({}, prev), { cost: e.target.value })))} required/>
+          <input className="rounded-lg border-2 border-pink-200 bg-white px-3 py-2.5 text-gray-900 placeholder:text-purple-300 outline-none transition-colors focus:border-pink-500" type="number" min="0" placeholder="Stock" value={form.stock} onChange={(e) => setForm((prev) => (Object.assign(Object.assign({}, prev), { stock: e.target.value })))} required/>
+
+          <input className="rounded-lg border-2 border-pink-200 bg-white px-3 py-2.5 text-gray-900 placeholder:text-purple-300 outline-none transition-colors focus:border-pink-500" placeholder="Image URL" value={form.imageUrl} onChange={(e) => setForm((prev) => (Object.assign(Object.assign({}, prev), { imageUrl: e.target.value })))} required/>
+          <input className="file-input rounded-lg border-2 border-pink-400 bg-pink-50 px-3 py-2.5 text-sm text-purple-800 md:col-span-2" type="file" accept="image/*" onChange={(event) => void handleImageImport(event)}/>
+
+          {form.imageUrl && (<div className="rounded-xl border border-pink-200 bg-pink-50 p-3 md:col-span-2">
+              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-pink-700">Image preview</p>
+              <img src={form.imageUrl} alt="Product preview" className="h-28 w-28 rounded-lg border border-pink-200 object-cover"/>
             </div>)}
-        </div>
-        <input className="rounded border p-2" type="number" min="0" step="0.01" placeholder="Cost (required)" value={form.cost} onChange={(e) => setForm((prev) => (Object.assign(Object.assign({}, prev), { cost: e.target.value })))} required/>
-        <input className="rounded border p-2" type="number" min="0" placeholder="Stock" value={form.stock} onChange={(e) => setForm((prev) => (Object.assign(Object.assign({}, prev), { stock: e.target.value })))} required/>
-        <input className="rounded border p-2" placeholder="Image URL" value={form.imageUrl} onChange={(e) => setForm((prev) => (Object.assign(Object.assign({}, prev), { imageUrl: e.target.value })))} required/>
-        <input className="file-input rounded border p-2 md:col-span-2" type="file" accept="image/*" onChange={(event) => void handleImageImport(event)}/>
-        {form.imageUrl && (<div className="md:col-span-2">
-            <p className="mb-1 text-xs text-gray-500">Image preview</p>
-            <img src={form.imageUrl} alt="Product preview" className="h-28 w-28 rounded border object-cover"/>
-          </div>)}
-        <textarea className="rounded border p-2 md:col-span-2" placeholder="Description" value={form.description} onChange={(e) => setForm((prev) => (Object.assign(Object.assign({}, prev), { description: e.target.value })))} rows={3} required/>
-        <div className="flex gap-2 md:col-span-2">
-          <button className="rounded bg-black px-4 py-2 text-white" type="submit">
-            {submitLabel}
-          </button>
-          {editingId && (<button className="rounded border px-4 py-2" type="button" onClick={resetForm}>
-              Cancel Edit
-            </button>)}
-        </div>
-      </form>
 
-      {error && (<div className="mb-4 rounded bg-red-50 border border-red-200 p-3 text-red-800">
-          <p className="font-medium">Error</p>
+          <textarea className="rounded-lg border-2 border-pink-200 bg-white px-3 py-2.5 text-gray-900 placeholder:text-purple-300 outline-none transition-colors focus:border-pink-500 md:col-span-2" placeholder="Description" value={form.description} onChange={(e) => setForm((prev) => (Object.assign(Object.assign({}, prev), { description: e.target.value })))} rows={3} required/>
+
+          <div className="flex flex-wrap gap-2 md:col-span-2">
+            <button className="rounded-lg bg-gradient-to-r from-pink-500 to-purple-500 px-5 py-2.5 text-sm font-semibold text-white shadow transition-all hover:from-pink-600 hover:to-purple-600" type="submit">
+              {submitLabel}
+            </button>
+            {editingId && (<button className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-100" type="button" onClick={resetForm}>
+                Cancel Edit
+              </button>)}
+          </div>
+        </form>
+      </section>
+
+      {error && (<div className="mb-4 rounded-xl border-l-4 border-red-500 bg-red-50 p-4 text-red-800">
+          <p className="font-semibold">Error</p>
           <p className="text-sm">{error}</p>
         </div>)}
-      {loading ? (<div className="text-center py-8">
-          <p className="text-gray-600">Loading products...</p>
-        </div>) : products.length === 0 ? (<div className="text-center py-8">
-          <p className="text-gray-500">No products yet. Create one above!</p>
-        </div>) : (<div className="overflow-x-auto">
-          <table className="min-w-full border-collapse border">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border p-2 text-left">ID</th>
-                <th className="border p-2 text-left">Name</th>
-                <th className="border p-2 text-left">Category</th>
-                  <th className="border p-2 text-left">Cost</th>
-                  <th className="border p-2 text-left">Stock</th>
-                <th className="border p-2 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product) => (<tr key={product.id}>
-                  <td className="border p-2">{product.id}</td>
-                  <td className="border p-2">{product.name}</td>
-                  <td className="border p-2">{product.category}</td>
-                  <td className="border p-2">
-                    {product.cost === null ? "-" : `$${product.cost.toFixed(2)}`}
-                  </td>
-                  <td className="border p-2">{product.stock}</td>
-                  <td className="border p-2">
-                    <div className="flex gap-2">
-                      <button className="rounded bg-blue-600 hover:bg-blue-700 active:bg-blue-800 px-3 py-1 text-sm text-white font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed" onClick={() => startEdit(product)} disabled={deletingId !== null}>
-                        Edit
-                      </button>
-                      <button className="rounded bg-red-600 hover:bg-red-700 active:bg-red-800 px-3 py-1 text-sm text-white font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed" onClick={() => handleDelete(product.id)} disabled={deletingId === product.id}>
-                        {deletingId === product.id ? "Deleting..." : "Delete"}
-                      </button>
-                    </div>
-                  </td>
-                </tr>))}
-            </tbody>
-          </table>
-        </div>)}
+
+      {loading ? (<div className="rounded-2xl border-2 border-pink-200 bg-white/80 p-6 text-center text-sm font-medium text-purple-800 shadow-sm">
+          Loading products...
+        </div>) : products.length === 0 ? (<div className="rounded-2xl border-2 border-dashed border-pink-300 bg-pink-50 p-8 text-center text-sm font-medium text-pink-700">
+          No products yet. Create one above.
+        </div>) : (<section className="overflow-hidden rounded-2xl border-2 border-pink-200 bg-white/90 shadow-lg">
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead className="bg-gradient-to-r from-pink-50 to-purple-50">
+                <tr>
+                  <th className="border-b border-pink-200 px-4 py-3 text-left text-sm font-semibold text-purple-900">ID</th>
+                  <th className="border-b border-pink-200 px-4 py-3 text-left text-sm font-semibold text-purple-900">Name</th>
+                  <th className="border-b border-pink-200 px-4 py-3 text-left text-sm font-semibold text-purple-900">Category</th>
+                  <th className="border-b border-pink-200 px-4 py-3 text-left text-sm font-semibold text-purple-900">Cost</th>
+                  <th className="border-b border-pink-200 px-4 py-3 text-left text-sm font-semibold text-purple-900">Stock</th>
+                  <th className="border-b border-pink-200 px-4 py-3 text-left text-sm font-semibold text-purple-900">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((product, index) => (<tr key={product.id} className={index % 2 === 0 ? "bg-white" : "bg-pink-50/40"}>
+                    <td className="border-b border-pink-100 px-4 py-3 text-sm text-purple-800">{product.id}</td>
+                    <td className="border-b border-pink-100 px-4 py-3 text-base font-medium text-purple-900">{product.name}</td>
+                    <td className="border-b border-pink-100 px-4 py-3 text-base text-purple-900">{product.category}</td>
+                    <td className="border-b border-pink-100 px-4 py-3 text-base font-semibold text-pink-700 whitespace-nowrap">
+                      {product.cost === null ? "-" : `$${product.cost.toFixed(2)}`}
+                    </td>
+                    <td className="border-b border-pink-100 px-4 py-3 text-base font-medium text-purple-900">{product.stock}</td>
+                    <td className="border-b border-pink-100 px-4 py-3">
+                      <div className="flex gap-2">
+                        <button className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 active:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60" onClick={() => startEdit(product)} disabled={deletingId !== null}>
+                          Edit
+                        </button>
+                        <button className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-red-700 active:bg-red-800 disabled:cursor-not-allowed disabled:opacity-60" onClick={() => handleDelete(product.id)} disabled={deletingId === product.id}>
+                          {deletingId === product.id ? "Deleting..." : "Delete"}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>))}
+              </tbody>
+            </table>
+          </div>
+        </section>)}
     </main>);
 }
