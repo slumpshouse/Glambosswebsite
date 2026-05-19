@@ -91,14 +91,6 @@ export function Navbar() {
               Logout
             </button>
           )}
-          {!authenticated && (
-            <Link
-              href="/admin/login"
-              className="rounded-md bg-black px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-900"
-            >
-              Admin Login
-            </Link>
-          )}
         </nav>
       </div>
     </header>
