@@ -26,6 +26,7 @@ The proposed solution is a business management web application that gives my aun
 
 ## Technical constraints
 - The app requires `DATABASE_URL`, `NEXTAUTH_SECRET`, and `NEXTAUTH_URL`.
+- Optional for first-deploy admin bootstrap: `ADMIN_EMAIL` and `ADMIN_PASSWORD`.
 - The app depends on PostgreSQL for core data operations.
 - Prisma client generation is required before build and runtime.
 - Admin access must follow role-based authorization rules.
@@ -55,6 +56,8 @@ npm install
 DATABASE_URL=your_postgres_connection_string
 NEXTAUTH_SECRET=your_random_secret
 NEXTAUTH_URL=http://localhost:3000
+ADMIN_EMAIL=admin@glamgoddessshop.com
+ADMIN_PASSWORD=choose_a_strong_password
 STRIPE_SECRET_KEY=your_stripe_secret_key
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
 STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret

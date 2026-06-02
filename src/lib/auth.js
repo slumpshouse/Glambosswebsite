@@ -5,6 +5,49 @@ import { prisma } from "./prisma";
 import { loginSchema } from "./auth-validation";
 import { logAdminAction } from "./audit-log";
 
+function getBootstrapAdminCredentials() {
+  const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const password = process.env.ADMIN_PASSWORD;
+
+  if (!email || !password) {
+    return null;
+  }
+
+  return { email, password };
+}
+
+async function resolveUserOrBootstrap(parsed) {
+  const user = await prisma.user.findUnique({
+    where: { email: parsed.email },
+  });
+
+  if (user) {
+    return user;
+  }
+
+  const bootstrap = getBootstrapAdminCredentials();
+
+  if (
+    !bootstrap ||
+    parsed.email !== bootstrap.email ||
+    parsed.password !== bootstrap.password
+  ) {
+    return null;
+  }
+
+  const passwordHash = await bcrypt.hash(bootstrap.password, 12);
+
+  return prisma.user.upsert({
+    where: { email: bootstrap.email },
+    update: { passwordHash, role: "admin" },
+    create: {
+      email: bootstrap.email,
+      passwordHash,
+      role: "admin",
+    },
+  });
+}
+
 export const authOptions = {
   providers: [
     CredentialsProvider({
@@ -18,10 +61,8 @@ export const authOptions = {
         const parsed = loginSchema.safeParse(credentials);
         if (!parsed.success) return null;
 
-        // 2. Look up the user in Postgres.
-        const user = await prisma.user.findUnique({
-          where: { email: parsed.data.email },
-        });
+        // 2. Look up the user in Postgres or bootstrap the initial admin.
+        const user = await resolveUserOrBootstrap(parsed.data);
 
         if (!user) {
           await logAdminAction("login_failed", parsed.data.email, {
