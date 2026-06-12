@@ -22,13 +22,11 @@ export async function GET() {
     const [
       metrics,
       recentSales,
-      pendingRequests,
       lowStockItems,
       weeklySalesOverview,
     ] = await Promise.all([
       fetchMetrics(),
       fetchRecentSales(),
-      fetchPendingRequests(),
       fetchLowStockItems(),
       fetchWeeklySalesOverview(),
     ]);
@@ -36,7 +34,6 @@ export async function GET() {
     const summary = {
       metrics,
       recentSales,
-      pendingRequests,
       lowStockItems,
       weeklySalesOverview,
     };
@@ -89,25 +86,6 @@ async function fetchRecentSales() {
     totalPrice: sale.totalPrice,
     paymentStatus: sale.paymentStatus,
     createdAt: sale.createdAt,
-  }));
-}
-
-async function fetchPendingRequests() {
-  const requests = await prisma.request.findMany({
-    where: { status: "pending" },
-    take: 5,
-    orderBy: { createdAt: "desc" },
-    include: {
-      product: { select: { name: true } },
-    },
-  });
-
-  return requests.map((req) => ({
-    id: req.id,
-    productName: req.product.name,
-    quantity: req.quantity,
-    status: req.status,
-    createdAt: req.createdAt,
   }));
 }
 

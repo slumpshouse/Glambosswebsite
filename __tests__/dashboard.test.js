@@ -13,9 +13,6 @@ vi.mock("@/src/lib/prisma", () => ({
       count: vi.fn(),
       findMany: vi.fn(),
     },
-    request: {
-      findMany: vi.fn(),
-    },
   },
 }));
 
@@ -194,27 +191,6 @@ describe("Dashboard Metrics", () => {
       expect(result[0].createdAt >= result[1].createdAt).toBe(true);
     });
 
-    it("should fetch pending requests ordered by most recent", async () => {
-      const mockRequests = [
-        {
-          id: 1,
-          productName: "Product A",
-          quantity: 10,
-          status: "pending",
-          createdAt: new Date("2024-01-15"),
-        },
-      ];
-
-      mockedPrisma.request.findMany.mockResolvedValue(mockRequests);
-
-      const result = await mockedPrisma.request.findMany({
-        where: { status: "pending" },
-        take: 5,
-        orderBy: { createdAt: "desc" },
-      });
-
-      expect(result[0].status).toBe("pending");
-    });
   });
 
   describe("Weekly Sales Aggregation", () => {

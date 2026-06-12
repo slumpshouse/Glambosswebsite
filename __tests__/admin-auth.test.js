@@ -42,7 +42,6 @@ async function checkMiddleware(pathname, tokenPayload) {
   const protectedPrefixes = [
     "/dashboard",
     "/products",
-    "/requests",
     "/customers",
     "/sales",
     "/admin",
@@ -170,7 +169,6 @@ describe("B. Session Management", () => {
 describe("C. Access Control", () => {
   it("redirects protected admin routes without token", async () => {
     expect(await checkMiddleware("/products", null)).toBe("redirect");
-    expect(await checkMiddleware("/requests", null)).toBe("redirect");
     expect(await checkMiddleware("/sales", null)).toBe("redirect");
     expect(await checkMiddleware("/customers", null)).toBe("redirect");
   });

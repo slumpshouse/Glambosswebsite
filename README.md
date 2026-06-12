@@ -7,8 +7,7 @@ The proposed solution is a business management web application that gives my aun
 ## Features
 - Admin authentication and protected routes.
 - Product and stock management.
-- Customer request creation and confirmation workflow.
-- Customer payment flow for confirmed sales.
+- Customer cart checkout and payment flow.
 - Sales recording, including manual sales entry.
 - Dashboard metrics and weekly sales summaries.
 - Audit logs for important admin actions.
@@ -30,16 +29,15 @@ The proposed solution is a business management web application that gives my aun
 - The app depends on PostgreSQL for core data operations.
 - Prisma client generation is required before build and runtime.
 - Admin access must follow role-based authorization rules.
-- Online payments use Stripe for customer checkout after request confirmation.
+- Online payments use Stripe for customer checkout.
 - Real-time chat and advanced analytics are not included yet.
 
 ## Core features
 - Secure admin login with role-based route protection.
 - Product catalog and stock management for daily operations.
-- Customer request workflow from creation to confirmation.
-- Stripe-based payment checkout for confirmed requests.
+- Stripe-based payment checkout for cart purchases.
 - Manual sales entry with transaction-safe validation.
-- Customer lookup and request/sales history view.
+- Customer lookup and sales history view.
 - Dashboard metrics and weekly sales summary generation.
 - Audit logging for authentication and sensitive actions.
 
@@ -84,7 +82,6 @@ npm run dev
 6. Open the app at `http://localhost:3000`.
 
 ## Payments
-- Customers submit requests first, then complete payment after the request is confirmed.
 - Create a Stripe webhook in your Stripe dashboard pointing to `/api/payments/webhook`.
 - Store the Stripe keys in `.env` before running the app.
-- Payment status is visible in the customer request history and admin sales tables.
+- Payment status is visible in admin sales tables.

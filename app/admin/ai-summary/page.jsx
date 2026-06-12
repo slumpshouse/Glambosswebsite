@@ -103,15 +103,6 @@ export default function AiSummaryPage() {
 
           {aggregate && (<section className="grid gap-4 md:grid-cols-2">
               <div className="rounded-2xl border-2 border-pink-200 bg-white p-5 shadow-sm">
-                <h2 className="mb-3 text-2xl font-bold text-purple-900">Product Volume</h2>
-                <ul className="space-y-2 text-sm text-purple-800">
-                  {aggregate.productVolume.slice(0, 8).map((row) => (<li key={row.productId} className="rounded-lg bg-pink-50 px-3 py-2">
-                      <span className="font-semibold">{row.productName}</span>: {row.unitsSold} units (${row.revenue.toFixed(2)})
-                    </li>))}
-                </ul>
-              </div>
-
-              <div className="rounded-2xl border-2 border-pink-200 bg-white p-5 shadow-sm">
                 <h2 className="mb-3 text-2xl font-bold text-purple-900">Customer Trends</h2>
                 <p className="text-sm text-purple-800">New customers this week: <span className="font-semibold">{aggregate.customerTrends.newCustomers}</span></p>
                 <p className="mb-3 text-sm text-purple-800">Repeat customers this week: <span className="font-semibold">{aggregate.customerTrends.repeatCustomers}</span></p>
@@ -151,10 +142,12 @@ export default function AiSummaryPage() {
               </button>
             </div>
 
-            <label htmlFor="summary" className="mb-2 block text-sm font-semibold text-purple-700">
+            <p className="mb-2 block text-sm font-semibold text-purple-700">
               AI Summary
-            </label>
-            <textarea id="summary" readOnly className="min-h-[260px] w-full cursor-default rounded-xl border-2 border-pink-200 bg-pink-50/30 p-4 text-sm text-purple-900 placeholder:text-purple-300 outline-none" value={editableSummary} placeholder="Generate a summary to view it here."/>
+            </p>
+            <div className="min-h-[260px] w-full rounded-xl border-2 border-pink-200 bg-pink-50/30 p-4 text-sm text-purple-900 whitespace-pre-wrap">
+              {editableSummary || <span className="text-purple-300">Generate a summary to view it here.</span>}
+            </div>
           </section>
 
           {error && (<div className="rounded-xl border-l-4 border-red-500 bg-red-50 p-4 text-sm font-medium text-red-700">{error}</div>)}
