@@ -16,7 +16,13 @@ export default function LoginPage() {
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/admin/dashboard";
+  const rawCallbackUrl = searchParams.get("callbackUrl") ?? "/admin/dashboard";
+  const callbackUrl =
+    !rawCallbackUrl.startsWith("/") || rawCallbackUrl.startsWith("//")
+      ? "/admin/dashboard"
+      : rawCallbackUrl === "/admin"
+        ? "/admin/dashboard"
+        : rawCallbackUrl;
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState(null);

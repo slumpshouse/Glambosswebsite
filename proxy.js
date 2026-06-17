@@ -39,7 +39,11 @@ export async function proxy(req) {
   if (!token || token.role !== "admin") {
     const loginUrl = new URL("/login", req.url);
     // Preserve the intended destination so we can redirect back after login.
-    loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
+    const callbackPath =
+      req.nextUrl.pathname === "/admin"
+        ? "/admin/dashboard"
+        : req.nextUrl.pathname;
+    loginUrl.searchParams.set("callbackUrl", callbackPath);
     return NextResponse.redirect(loginUrl);
   }
 
